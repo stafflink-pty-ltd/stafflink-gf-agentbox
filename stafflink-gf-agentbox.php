@@ -1,14 +1,14 @@
 <?php
 use Stafflink\Lib\StafflinkAgentBox;
 /**
- * Plugin Name:     Stafflink Agentbox Integration
+ * Plugin Name:     Gravity Forms - Agentbox Integration
  * Plugin URI:      https://stafflink.com.au/
  * Description:     Allows pulling and pushing of data via the Agentbox API.
  * Author:          Matthew Neal
  * Author URI:      https://stafflink.com.au/
  * Text Domain:     agentbox-integration
  * Domain Path:     /languages
- * Version:         0.1.0
+ * Version:         0.3.0
  *
  * @package         SLAB
  */
@@ -19,12 +19,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require "vendor/autoload.php";
 
-if ( ! class_exists( 'SLAB' ) ) {
+if ( ! class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 
 	/**
 	 * The main slab class
 	 */
-	class SLAB {
+	class GF_Agentbox_Bootstrap {
 
 		/**
 		 * The plugin version number.
@@ -55,7 +55,7 @@ if ( ! class_exists( 'SLAB' ) ) {
 		public $instances = array();
 
 		/**
-		 * A dummy constructor to ensure SLAB is only setup once.
+		 * A dummy constructor to ensure GF_Agentbox_Bootstrap is only setup once.
 		 *
 		 * @return  void
 		 */
@@ -64,26 +64,26 @@ if ( ! class_exists( 'SLAB' ) ) {
 		}
 
 		/**
-		 * Sets up the SLAB plugin.
+		 * Sets up the GF_Agentbox_Bootstrap plugin.
 		 *
 		 * @return  void
 		 */
 		public function initialize() {
 
 			// Define constants.
-			$this->define( 'SLAB', true );
-			$this->define( 'SLAB_PATH', plugin_dir_path( __FILE__ ) );
-			$this->define( 'SLAB_BASENAME', plugin_basename( __FILE__ ) );
-			$this->define( 'SLAB_VERSION', $this->version );
-			$this->define( 'SLAB_MAJOR_VERSION', 1 );
+			$this->define( 'GF_Agentbox_Bootstrap', true );
+			$this->define( 'GF_Agentbox_Bootstrap_PATH', plugin_dir_path( __FILE__ ) );
+			$this->define( 'GF_Agentbox_Bootstrap_BASENAME', plugin_basename( __FILE__ ) );
+			$this->define( 'GF_Agentbox_Bootstrap_VERSION', $this->version );
+			$this->define( 'GF_Agentbox_Bootstrap_MAJOR_VERSION', 1 );
 
 			// Define settings.
 		$this->settings = array(
-				'name'                    => __( 'Gravity Forms - Agentbox Integration', 'SLAB' ),
-				'slug'                    => dirname( SLAB_BASENAME ),
-				'version'                 => SLAB_VERSION,
-				'basename'                => SLAB_BASENAME,
-				'path'                    => SLAB_PATH,
+				'name'                    => __( 'Gravity Forms - Agentbox Integration', 'GF_Agentbox_Bootstrap' ),
+				'slug'                    => 'stafflink-gf-agentbox',
+				'version'                 => GF_Agentbox_Bootstrap_VERSION,
+				'basename'                => GF_Agentbox_Bootstrap_BASENAME,
+				'path'                    => GF_Agentbox_Bootstrap_PATH,
 				'file'                    => __FILE__,
 				'url'                     => plugin_dir_url( __FILE__ ),
 				'show_admin'              => true,
@@ -124,14 +124,14 @@ if ( ! class_exists( 'SLAB' ) ) {
 			}
 
 			/**
-			 * Fires after SLAB is completely "initialized".
+			 * Fires after GF_Agentbox_Bootstrap is completely "initialized".
 			 *
 			 * @date    28/09/13
 			 * @since   5.0.0
 			 *
-			 * @param   int SLAB_MAJOR_VERSION The major version of SLAB.
+			 * @param   int GF_Agentbox_Bootstrap_MAJOR_VERSION The major version of GF_Agentbox_Bootstrap.
 			 */
-			do_action( 'SLAB/init', SLAB_MAJOR_VERSION );
+			do_action( 'GF_Agentbox_Bootstrap/init', GF_Agentbox_Bootstrap_MAJOR_VERSION );
 		}
 
 		/**
@@ -227,25 +227,25 @@ if ( ! class_exists( 'SLAB' ) ) {
     }
 
 	/**
-	 * The main function responsible for returning the one true SLAB Instance to functions everywhere.
+	 * The main function responsible for returning the one true GF_Agentbox_Bootstrap Instance to functions everywhere.
 	 * Use this function like you would a global variable, except without needing to declare the global.
 	 *
-	 * Example: <?php $SLAB = SLAB(); ?>
+	 * Example: <?php $GF_Agentbox_Bootstrap = GF_Agentbox_Bootstrap(); ?>
 	 *
-	 * @return  SLAB
+	 * @return  GF_Agentbox_Bootstrap
 	 */
-	function SLAB() {
-		global $SLAB;
+	function GF_Agentbox_Bootstrap() {
+		global $GF_Agentbox_Bootstrap;
 
 		// Instantiate only once.
-		if ( ! isset( $SLAB ) ) {
-			$SLAB = new SLAB();
-			$SLAB->initialize();
+		if ( ! isset( $GF_Agentbox_Bootstrap ) ) {
+			$GF_Agentbox_Bootstrap = new GF_Agentbox_Bootstrap();
+			$GF_Agentbox_Bootstrap->initialize();
 		}
-		return $SLAB;
+		return $GF_Agentbox_Bootstrap;
 	}
 
 	// Instantiate.
-	SLAB();
+	GF_Agentbox_Bootstrap();
 
 } // class_exists check
