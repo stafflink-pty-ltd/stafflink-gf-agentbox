@@ -3,77 +3,69 @@
 namespace Stafflink\Lib;
 
 use Stafflink\Interface\ConnectionInterface;
-use Stafflink\Interface\LoggerInterface;
 use GuzzleHttp\Client;
 
 class AgentBoxClient extends ConnectionAbstract implements ConnectionInterface
 {
-    /**
-     * Undocumented variable
-     *
-     * @var EndpointConfiguration
-     */
-    private $config;
 
     /**
-     * Agentbox endpoint
+     * Contains the agentbox filters that the URI uses to get data
      *
-     * @var string
+     * @var array 
      */
-    private $endpoint;
+    protected $filters = [];
 
     /**
-     * Undocumented function
+     * Class constructor
+     * 
+     * @param array $headers
      */
-    public function __construct( $endpoint = "" )
+    public function __construct( $headers = [] )
     {
-        $this->base_url = "https://api.agentboxcrm.com.au/";
-        $this->version  = "version=2";
-        $this->endpoint = $endpoint;
-        $this->config   = new EndpointConfiguration( [ 
-            'headers' => [ 
-                'Content-Type' => 'application/json',
-                'Accept'       => 'application/json',
-                'X-Client-ID'  => getenv( 'AGENTBOX_CLIENT_ID' ),
-                'X-API-Key'    => getenv( 'AGENTBOX_CLIENT_SECRET' ),
-            ],
-            'params'  => [ 
-                'page'  => 1,
-                'limit' => 20,
-            ],
-        ] );
+        $this->headers = empty( $headers )
+            ? [ 
+                'headers' => [ 
+                    'Content-Type' => 'application/json',
+                    'Accept'       => 'application/json',
+                    'X-Client-ID'  => getenv( 'AGENTBOX_CLIENT_ID' ),
+                    'X-API-Key'    => getenv( 'AGENTBOX_CLIENT_SECRET' ),
+                ],
+                'params'  => [ 
+                    'page'  => 1,
+                    'limit' => 20,
+                ],
+            ]
+            : $headers;
+        $this->domain  = "https://api.agentboxcrm.com.au/";
+        $this->version = "2";
+        $this->config  = new EndpointConfiguration( $this->headers );
 
-        $this->create_request_uri( $this->config );
     }
 
-    /**
-     * Undocumented function
-     *
-     * @param EndpointConfiguration $config
-     * @return string
-     */
-    protected function create_request_uri( EndpointConfiguration $config )
+    protected function create_endpoint()
     {
-        return $this->url = $this->base_url . $this->endpoint . "?" . $this->version . "&";
+        
     }
-    
+
     /**
      * Agentbox GET Request
      * 
      * Create a GET request to agentbox server depending on endpoint and filters
      *
-     * @param string $endpoint Server endpoint on where to do the request
+     * @param string $resource Request resource
      * @param array $options REQUEST method and headers
      * @return string|array Returns either a JSON string or an array
      */
-    public function get( $endpoint = "", $options = [] ): string|array
+    public function get( $resource, $options = [] ): string|array
     {
         // Set user-defined options under same configuration
         $this->config->set( $options );
+
         // build the params for the http request
         $url_params = http_build_query( $this->config->params );
-        $request = $this->create_request_uri( $this->config );
-        $request = $request . $url_params;
+
+        $request    = $this->create_request_uri( $this->config );
+        $request    = $request . $url_params;
 
         // if filters are available, create http query for them
         if ( $this->config->has( 'filters' ) ) {
