@@ -1,9 +1,9 @@
 <?php
-namespace Stafflink\Lib;
-use Stafflink\Interface\ConnectionInterface;
-use Stafflink\Lib\EndpointConfiguration;
+namespace GFAgentbox\Inc;
 
-abstract class ConnectionAbstract
+use GFAgentbox\Inc\EndpointConfiguration;
+
+abstract class Base_Connection
 {
     /**
      * Undocumented variable
@@ -60,12 +60,21 @@ abstract class ConnectionAbstract
 
     } 
 
-    protected function create_endpoint()
+    /**
+     * Undocumented function
+     *
+     * @param [type] $resource
+     * @return void
+     */
+    protected function create_endpoint( $resource )
     {
-        
+        $params = $this->create_http_query_params();
+
+        return $this->endpoint = "{$this->domain}/{$resource}?{$params}";
     }
 
-    protected function create_params()
+    /** */
+    protected function create_http_query_params()
     {
         return http_build_query( $this->config->params );
     }

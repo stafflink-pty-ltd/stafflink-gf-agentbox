@@ -1,7 +1,6 @@
 <?php 
 
-namespace Stafflink\Interface;
-use Stafflink\Lib\EndpointConfiguration;
+namespace GFAgentbox\Inc;
 
 interface ConnectionInterface {
 

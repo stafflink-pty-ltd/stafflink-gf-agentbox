@@ -1,11 +1,12 @@
 <?php
 
-namespace Stafflink\Lib;
+namespace GFAgentbox\Agentbox;
 
-use Stafflink\Interface\ConnectionInterface;
-use GuzzleHttp\Client;
+use GFAgentbox\Inc\Base_Connection;
+use GFAgentbox\Inc\ConnectionInterface;
+use GFAgentbox\Inc\EndpointConfiguration;
 
-class AgentBoxClient extends ConnectionAbstract implements ConnectionInterface
+class AgentBoxClient implements ConnectionInterface
 {
 
     /**
@@ -42,9 +43,18 @@ class AgentBoxClient extends ConnectionAbstract implements ConnectionInterface
 
     }
 
-    protected function create_endpoint()
+    /**
+     * Create the endpoint to be used in the request
+     *
+     * @param string $resource resource used in agentbo endpoint
+     * @return string
+     */
+    protected function create_endpoint( $resource )
     {
-        
+        $params  = $this->create_http_query_params();
+        $filters = $this->create_http_query_filters();
+
+        return $this->endpoint = "{$this->domain}/{$resource}?{$filters}&{$params}&version={$this->version}";
     }
 
     /**
@@ -56,25 +66,13 @@ class AgentBoxClient extends ConnectionAbstract implements ConnectionInterface
      * @param array $options REQUEST method and headers
      * @return string|array Returns either a JSON string or an array
      */
-    public function get( $resource, $options = [] ): string|array
+    public function get( $resource, $filters = [] ): string|array
     {
-        // Set user-defined options under same configuration
-        $this->config->set( $options );
+        // Set the filters to be used then create the endpoint for the GET request
+        $this->config->set( [ 'filters' => $filters ] );
+        $endpoint = $this->create_endpoint( $resource );
 
-        // build the params for the http request
-        $url_params = http_build_query( $this->config->params );
-
-        $request    = $this->create_request_uri( $this->config );
-        $request    = $request . $url_params;
-
-        // if filters are available, create http query for them
-        if ( $this->config->has( 'filters' ) ) {
-            foreach ( $this->config->filters as $key => $filter ) {
-                $request .= 'filter[' . $key . ']=' . rawurlencode( $filter ) . '&';
-            }
-        }
-
-        var_dump( $request );
+        var_dump( $endpoint );
         exit;
 
         // Do a GET request
@@ -104,9 +102,16 @@ class AgentBoxClient extends ConnectionAbstract implements ConnectionInterface
 
     }
 
-    public function get_staff()
+    protected function create_http_query_filters()
     {
+        // if filters are available, create http query for them
+        if ( $this->config->has( 'filters' ) ) {
+            foreach ( $this->config->filters as $key => $filter ) {
+                $request .= 'filter[' . $key . ']=' . rawurlencode( $filter ) . '&';
+            }
+        }
 
+        return "";
     }
 
     public function set_param( $key, $value )

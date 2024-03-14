@@ -1,6 +1,6 @@
 <?php
 
-namespace Stafflink\Lib;
+namespace GFAgentbox\Inc;
 
 /**
  * Use to handle configuration of the API url
@@ -40,7 +40,7 @@ class EndpointConfiguration
      */
     public function has( $key )
     {
-        return in_array( $key, array_keys( $this->config ) );
+        return isset($this->config[$key]);
     }
 
 

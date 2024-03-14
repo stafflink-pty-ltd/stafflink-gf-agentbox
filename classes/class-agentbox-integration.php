@@ -5,7 +5,7 @@
  * @package category
  */
 
-namespace ocre;
+namespace GFAgentbox;
 
 /**
  * Agentbox Contact class. Does things to Agentbox API uwu.
