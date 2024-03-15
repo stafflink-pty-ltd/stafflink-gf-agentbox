@@ -64,7 +64,7 @@ abstract class Base_Connection
      * Undocumented function
      *
      * @param [type] $resource
-     * @return void
+     * @return string
      */
     protected function create_endpoint( $resource )
     {

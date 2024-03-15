@@ -11,15 +11,15 @@
  *
  * @package         SLAB
  */
-require "vendor/autoload.php";
+
+
 if ( !defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
 
-
 if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
-
+	require "vendor/autoload.php";
 	/**
 	 * The main slab class
 	 */
@@ -105,12 +105,18 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 
 			// Include admin.
 			if ( is_admin() ) {
-				// Don't do anything yet...
+				require_once dirname( __FILE__ ) . '/classes/inc/abstract-class-connection.php';
+				require_once dirname( __FILE__ ) . '/classes/inc/interface-connection.php';
+				require_once dirname( __FILE__ ) . '/classes/inc/class-endpoint-configuration.php';
 				require_once dirname( __FILE__ ) . '/classes/agentbox/class-agentbox-client.php';
 
 				$agentbox = new GFAgentbox\Agentbox\AgentBoxClient;
+				
+				$test = $agentbox->get('contact-classes', ['query' => 'Rose Park']);
 
-				// var_dump($agentbox);
+				var_dump($test);
+				exit;
+				
 				// $agentbox->get( '', array( 'email' => 'test@test.com' ) );
 			}
 		}

@@ -6,7 +6,7 @@ use GFAgentbox\Inc\Base_Connection;
 use GFAgentbox\Inc\ConnectionInterface;
 use GFAgentbox\Inc\EndpointConfiguration;
 
-class AgentBoxClient implements ConnectionInterface
+class AgentBoxClient extends Base_Connection implements ConnectionInterface
 {
 
     /**
@@ -28,8 +28,8 @@ class AgentBoxClient implements ConnectionInterface
                 'headers' => [ 
                     'Content-Type' => 'application/json',
                     'Accept'       => 'application/json',
-                    'X-Client-ID'  => getenv( 'AGENTBOX_CLIENT_ID' ),
-                    'X-API-Key'    => getenv( 'AGENTBOX_CLIENT_SECRET' ),
+                    'X-Client-ID'  => 'aHR0cHM6Ly9vY3JlbXVsdGkuYWdlbnRib3hjcm0uY29tLmF1L2FkbWluLw',
+                    'X-API-Key'    => '1930-3426-4edc-1c98-a09e-910c-a7e0-ed71-1cd9-a753',
                 ],
                 'params'  => [ 
                     'page'  => 1,
@@ -54,7 +54,19 @@ class AgentBoxClient implements ConnectionInterface
         $params  = $this->create_http_query_params();
         $filters = $this->create_http_query_filters();
 
-        return $this->endpoint = "{$this->domain}/{$resource}?{$filters}&{$params}&version={$this->version}";
+        $endpoint = "{$this->domain}{$resource}?";
+
+        if( $filters !== "" ) {
+            $endpoint .= "{$filters}&";
+        }
+
+        if( $params ) {
+            $endpoint .= "{$params}&";
+        }
+
+        $endpoint .= "version={$this->version}";
+
+        return $this->endpoint = $endpoint;
     }
 
     /**
@@ -72,17 +84,16 @@ class AgentBoxClient implements ConnectionInterface
         $this->config->set( [ 'filters' => $filters ] );
         $endpoint = $this->create_endpoint( $resource );
 
-        var_dump( $endpoint );
-        exit;
-
         // Do a GET request
-        $response = wp_remote_get( $request, $this->config->headers );
+        $response = wp_remote_get( $endpoint, $this->config->headers );
+
+        return $response;
+
         if ( is_wp_error( $response ) ) {
-            $this->log_what_happened( 'some text' );
-            wp_send_json_error( $response );
+            // wp_send_json_error( $response );
         }
 
-        wp_send_json_success( $response );
+        // wp_send_json_success( $response );
     }
 
     /**
@@ -102,16 +113,38 @@ class AgentBoxClient implements ConnectionInterface
 
     }
 
-    protected function create_http_query_filters()
+    /**
+     * Create Filters for Agentbox's HTTP requests
+     *
+     * @return string
+     */
+    protected function create_http_query_filters() : string
     {
+        $filters = [];
         // if filters are available, create http query for them
-        if ( $this->config->has( 'filters' ) ) {
-            foreach ( $this->config->filters as $key => $filter ) {
-                $request .= 'filter[' . $key . ']=' . rawurlencode( $filter ) . '&';
-            }
+        if ( ! $this->config->has( 'filters' ) ) {
+            return "";
         }
 
-        return "";
+        // add filters to array
+        foreach ( $this->config->filters['filters'] as $key => $filter ) {
+            $filters [] = 'filter[' . $key . ']=' . rawurlencode( $filter );
+        }
+
+        // create string for filters
+        $filters = implode( '&', $filters);
+
+        return $filters;
+    }
+
+    public function create_agentbox_comment()
+    {
+
+    }
+
+    protected function log()
+    {
+
     }
 
     public function set_param( $key, $value )
@@ -127,6 +160,7 @@ class AgentBoxClient implements ConnectionInterface
 
         return $this->config->params;
     }
+
 
 
 }

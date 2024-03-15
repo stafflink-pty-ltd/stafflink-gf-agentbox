@@ -21,6 +21,11 @@ class EndpointConfiguration
         $this->config = $config;
     }
 
+    public function get_configs()
+    {
+        return $this->config;
+    }
+
     /**
      * Sets the new config for the endpoint
      *
@@ -33,14 +38,20 @@ class EndpointConfiguration
     }
 
     /**
-     * Check if the key is available inside the config
+     * Check if the key is available inside th config
      *
      * @param [type] $key
      * @return boolean
      */
     public function has( $key )
     {
-        return isset($this->config[$key]);
+        // check if key is set
+        if(isset($this->config[$key])) {
+            // return whether the array is empty or not
+            return ! empty( $this->config[$key]);
+        };
+
+        return false;
     }
 
 
@@ -48,11 +59,11 @@ class EndpointConfiguration
      * GETTER magic method
      *
      * @param [type] $key
-     * @return void
+     * @return array
      */
     public function __get( $key )
     {
-        return $this->config[ $key ];
+        return [$key => $this->config[$key]];
     }
 
     /**
