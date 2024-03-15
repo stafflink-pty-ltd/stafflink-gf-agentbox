@@ -15,7 +15,7 @@ abstract class Base_Connection
     /**
      * Agentbox endpoint
      *
-     * @var string
+     * @var string $endpoint
      */
     protected $endpoint;
 
@@ -44,9 +44,24 @@ abstract class Base_Connection
     /**
      * Connection headers
      *
-     * @var array
+     * @var array $headers
      */
     protected $headers = [];
+
+
+    /**
+     * For saving logs000
+     *
+     * @var boolean $do_logs If set to TRUE, create logs per http request and responses
+     */
+    protected $do_logs = false;
+
+    /**
+     * Indicate the current request method to be used
+     *
+     * @var [type]
+     */
+    protected $request_method;
 
     /**
      * Class consturctor

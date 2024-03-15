@@ -17,9 +17,12 @@ if ( !defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+require "vendor/autoload.php";
+$dotenv = Dotenv\Dotenv::createImmutable(ABSPATH);
+$dotenv->load();
 
 if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
-	require "vendor/autoload.php";
+	
 	/**
 	 * The main slab class
 	 */
@@ -112,7 +115,7 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 
 				$agentbox = new GFAgentbox\Agentbox\AgentBoxClient;
 				
-				$test = $agentbox->get('contact-classes', ['query' => 'Rose Park']);
+				$test = $agentbox->get('contact-classesz', ['query' => 'Rose Park']);
 
 				var_dump($test);
 				exit;

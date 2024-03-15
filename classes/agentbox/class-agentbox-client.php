@@ -28,8 +28,8 @@ class AgentBoxClient extends Base_Connection implements ConnectionInterface
                 'headers' => [ 
                     'Content-Type' => 'application/json',
                     'Accept'       => 'application/json',
-                    'X-Client-ID'  => 'aHR0cHM6Ly9vY3JlbXVsdGkuYWdlbnRib3hjcm0uY29tLmF1L2FkbWluLw',
-                    'X-API-Key'    => '1930-3426-4edc-1c98-a09e-910c-a7e0-ed71-1cd9-a753',
+                    'X-Client-ID'  => $_ENV['AGENTBOX_CLIENT_ID'],
+                    'X-API-Key'    => $_ENV['AGENTBOX_CLIENT_SECRET'],
                 ],
                 'params'  => [ 
                     'page'  => 1,
@@ -40,7 +40,6 @@ class AgentBoxClient extends Base_Connection implements ConnectionInterface
         $this->domain  = "https://api.agentboxcrm.com.au/";
         $this->version = "2";
         $this->config  = new EndpointConfiguration( $this->headers );
-
     }
 
     /**
@@ -51,16 +50,18 @@ class AgentBoxClient extends Base_Connection implements ConnectionInterface
      */
     protected function create_endpoint( $resource )
     {
+        // Get endpoint params and filters
         $params  = $this->create_http_query_params();
         $filters = $this->create_http_query_filters();
 
+        // Endpoint base url
         $endpoint = "{$this->domain}{$resource}?";
 
-        if( $filters !== "" ) {
+        if ( $filters !== "" ) {
             $endpoint .= "{$filters}&";
         }
 
-        if( $params ) {
+        if ( $params ) {
             $endpoint .= "{$params}&";
         }
 
@@ -83,17 +84,13 @@ class AgentBoxClient extends Base_Connection implements ConnectionInterface
         // Set the filters to be used then create the endpoint for the GET request
         $this->config->set( [ 'filters' => $filters ] );
         $endpoint = $this->create_endpoint( $resource );
+        $this->request_method = 'GET';
 
         // Do a GET request
+        $this->log( "Processing GET request to {$resource} resource" );
         $response = wp_remote_get( $endpoint, $this->config->headers );
 
-        return $response;
-
-        if ( is_wp_error( $response ) ) {
-            // wp_send_json_error( $response );
-        }
-
-        // wp_send_json_success( $response );
+        return $this->response( $response );
     }
 
     /**
@@ -114,37 +111,75 @@ class AgentBoxClient extends Base_Connection implements ConnectionInterface
     }
 
     /**
+     * STAHP WAISTING PAPER, go paperless
+     *
+     * @param bool $bool Determine if you want to save logs or not. Just save logs
+     * @return void
+     */
+    public function save_logs( $bool )
+    {
+        $this->do_logs = $bool;
+    }
+
+    /**
+     *  Process the response of the requests
+     *
+     * @param array $response
+     * @return array|bool
+     */
+    protected function response( $response ): array|bool
+    {
+        // log errors then return immedia
+        if ( is_wp_error( $response ) || 404 == $response['response']['code'] ) {
+            if ( defined( 'WP_DEBUG' ) && true === WP_DEBUG || $this->save_logs ) {
+                $this->log( "Failed to do a {$this->request_method}" );
+            }
+
+            return false;
+        }
+
+        return $response;
+    }
+
+    /**
      * Create Filters for Agentbox's HTTP requests
      *
      * @return string
      */
-    protected function create_http_query_filters() : string
+    protected function create_http_query_filters(): string
     {
         $filters = [];
         // if filters are available, create http query for them
-        if ( ! $this->config->has( 'filters' ) ) {
+        if ( !$this->config->has( 'filters' ) ) {
             return "";
         }
 
         // add filters to array
         foreach ( $this->config->filters['filters'] as $key => $filter ) {
-            $filters [] = 'filter[' . $key . ']=' . rawurlencode( $filter );
+            $filters[] = 'filter[' . $key . ']=' . rawurlencode( $filter );
         }
 
         // create string for filters
-        $filters = implode( '&', $filters);
+        $filters = implode( '&', $filters );
 
         return $filters;
     }
 
-    public function create_agentbox_comment()
+    /**
+     * Creates a trail of logs
+     *
+     * @param string $message
+     * @param boolean $is_print_r
+     * @return void
+     */
+    protected function log( $message, $is_print_r = false )
     {
-
-    }
-
-    protected function log()
-    {
-
+        $prepend_message = "AgentBox Integration: ";
+        if ( $is_print_r ) {
+            error_log( print_r( $message, true ), 0 );
+        } else {
+            error_log( $prepend_message . $message, 0 );
+        }
     }
 
     public function set_param( $key, $value )

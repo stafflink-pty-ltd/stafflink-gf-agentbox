@@ -3,7 +3,8 @@
     "description": "form integration with agentbox",
     "type": "wordpress-plugin",
     "require": {
-        "guzzlehttp/guzzle": "^7.8"
+        "guzzlehttp/guzzle": "^7.8",
+        "vlucas/phpdotenv": "^5.6"
     },
     "autoload": {
         "psr-4": {
