@@ -114,10 +114,23 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 				require_once dirname( __FILE__ ) . '/classes/agentbox/class-agentbox-client.php';
 
 				$agentbox = new GFAgentbox\Agentbox\AgentBoxClient;
-				
-				$test = $agentbox->get('contact-classesz', ['query' => 'Rose Park']);
 
-				var_dump($test);
+				$body = [
+					"enquiry" => [
+						"comment" => 'test',
+						"source" => "website",
+						"attachedContact" => [
+							"firstName" => 'test',
+							"lastName" => 'test',
+							"email" => 'test',
+							"mobile" => 'test',
+						]
+					]
+				];
+				
+				$test = $agentbox->post('enquiry', $body );
+
+				// var_dump($test);
 				exit;
 				
 				// $agentbox->get( '', array( 'email' => 'test@test.com' ) );

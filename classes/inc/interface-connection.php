@@ -19,7 +19,7 @@ interface ConnectionInterface {
      *
      * @return array|false
      */
-    public function post( $endpoint, $body ) : array|false;
+    public function post( $resource, $request_body ) : string|array;
 
 
     /**

@@ -92,24 +92,26 @@ class EndpointConfiguration
             $key = $this->camel_to_kebab( $key ); // convert to proper case
 
             // Check if key is in array
-            return ( in_array( $key, array_keys( $this->config ) ) ) 
-                    ? $this->config[ $key ][ $arguments ]
-                    : null;
+            return isset($this->config[$key]) ? $this->config[$key] : null;
         }
 
         // For set methods
         if ( str_contains( $method, 'set' ) ) {
             $key = str_replace( 'set', '', $method ); // remove 'get'
             $key = $this->camel_to_kebab( $key ); // convert to proper case
+            
+            $merge = [];
 
-            // Check if key is in array
-            return ( in_array( $key, array_keys( $this->config ) ) ) 
-                    ? $this->config[ $key ][ $arguments ]
-                    : null;
+            // save key and arguments
+            foreach( $arguments as $argument ) {
+                
+            }
+        
+            var_dump($merge);
         }
 
 
-        throw new \BadMethodCallException( "Method {$method} does not exist" );
+        // throw new \BadMethodCallException( "Method {$method} does not exist" );
     }
 
     /**
