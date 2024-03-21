@@ -120,9 +120,9 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 						"comment" => 'test',
 						"source" => "website",
 						"attachedContact" => [
-							"firstName" => 'test',
-							"lastName" => 'test',
-							"email" => 'test',
+							"firstName" => 'Amiel',
+							"lastName" => 'Stafflink',
+							"email" => 'amiel@stafflink.com.au',
 							"mobile" => 'test',
 						]
 					]
@@ -130,7 +130,7 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 				
 				$test = $agentbox->post('enquiry', $body );
 
-				// var_dump($test);
+				var_dump($test);
 				exit;
 				
 				// $agentbox->get( '', array( 'email' => 'test@test.com' ) );

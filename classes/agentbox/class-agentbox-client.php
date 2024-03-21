@@ -109,14 +109,11 @@ class AgentBoxClient extends Base_Connection implements ConnectionInterface
         $this->log( "Processing POST request to {$resource} resource");
 
         // Set the body of the request;
-        $this->config->setBody( $request_body, ['this' => 'that'] );
+        $this->config->setBody( $request_body );
 
-        // var_dump( $request_body );
-        
+        $response = wp_remote_post( $endpoint, $this->config->get_configs() );
 
-        // var_dump($this->config->get_configs());
-        return [];
-        // $response = wp_remote_post( $endpoint, $this->config->get_configs() );
+        return $response;
     }
 
     public function put( $endpoint, $body ): array|false

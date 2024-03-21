@@ -104,10 +104,10 @@ class EndpointConfiguration
 
             // save key and arguments
             foreach( $arguments as $argument ) {
-                
+                $merge = array_merge_recursive($merge, $argument);
             }
-        
-            var_dump($merge);
+            
+            $this->config[$key] = $merge;
         }
 
 
