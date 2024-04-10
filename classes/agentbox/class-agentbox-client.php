@@ -110,15 +110,35 @@ class AgentBoxClient extends Base_Connection implements ConnectionInterface
 
         // Set the body of the request;
         $this->config->setBody( $request_body );
+        $this->config->convertToJSON( 'body' );
 
         $response = wp_remote_post( $endpoint, $this->config->get_configs() );
 
         return $response;
     }
 
-    public function put( $endpoint, $body ): array|false
+    /**
+     * Undocumented function
+     *
+     * @param [type] $resource
+     * @param [type] $body
+     * @return array|false
+     */
+    public function put( $resource, $request_body ): array|false
     {
+        $endpoint = $this->create_endpoint( $resource );
+        $this->request_method = "POST";
 
+        // Do a POST request
+        $this->log( "Processing POST request to {$resource} resource");
+
+        // Set the body of the request;
+        $this->config->setBody( $request_body );
+        $this->config->convertToJSON( 'body' );
+
+        $response = wp_remote_post( $endpoint, $this->config->get_configs() );
+
+        return $response;
     }
 
     /**
@@ -141,7 +161,7 @@ class AgentBoxClient extends Base_Connection implements ConnectionInterface
     protected function response( $response ): array|bool
     {
         // log errors then return immedia
-        if ( is_wp_error( $response ) || 404 == $response['response']['code'] ) {
+        if ( is_wp_error( $response ) || 201 !== $response['response']['code'] ) {
             if ( defined( 'WP_DEBUG' ) && true === WP_DEBUG || $this->save_logs ) {
                 $this->log( "Failed to do a {$this->request_method} request" );
             }

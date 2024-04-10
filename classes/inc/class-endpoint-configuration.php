@@ -54,6 +54,19 @@ class EndpointConfiguration
         return false;
     }
 
+    /**
+     * Convert key value to json
+     *
+     * @param [type] $key
+     * @return void
+     */
+    public function convertToJSON( $key ) 
+    {
+        $saved_array = $this->config[ $key ];
+        
+        $this->config[$key] = json_encode($saved_array);
+    }
+
 
     /**
      * GETTER magic method

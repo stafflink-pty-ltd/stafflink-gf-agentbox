@@ -123,15 +123,15 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 							"firstName" => 'Amiel',
 							"lastName" => 'Stafflink',
 							"email" => 'amiel@stafflink.com.au',
-							"mobile" => 'test',
+							"mobile" => '1231231231',
 						]
 					]
 				];
 				
-				$test = $agentbox->post('enquiry', $body );
+				$test = $agentbox->post('enquiries', $body );
 
-				var_dump($test);
-				exit;
+				// var_dump($test);
+				// exit;
 				
 				// $agentbox->get( '', array( 'email' => 'test@test.com' ) );
 			}
