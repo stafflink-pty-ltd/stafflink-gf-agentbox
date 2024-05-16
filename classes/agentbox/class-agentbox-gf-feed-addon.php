@@ -5,7 +5,6 @@ GFForms::include_feed_addon_framework();
 
 class GF_Agentbox extends GFFeedAddOn
 {
-
 	/**
 	 * Holds the cached request bodies for the current submission.
 	 *
@@ -97,7 +96,6 @@ class GF_Agentbox extends GFFeedAddOn
 	 */
 	protected $_async_feed_processing = true;
 
-
 	/**
 	 * Returns an instance of this class then stores it in the $_instance propety;
 	 *
@@ -112,7 +110,6 @@ class GF_Agentbox extends GFFeedAddOn
 		return self::$_instance;
 	}
 
-
 	/**
 	 * Admin initialization
 	 * 
@@ -122,7 +119,6 @@ class GF_Agentbox extends GFFeedAddOn
 	{
 		parent::init_admin();
 	}
-
 
 	/**
 	 * Global plugin settings.
@@ -248,7 +244,7 @@ class GF_Agentbox extends GFFeedAddOn
 	}
 
 	/**
-	 * Build the mapping for options
+	 * Agentbox default field name for options
 	 * 
 	 * @return  array  $options
 	 */
