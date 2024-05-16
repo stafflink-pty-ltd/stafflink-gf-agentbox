@@ -165,109 +165,45 @@ class GF_Agentbox extends GFFeedAddOn
 	 */
 	public function feed_settings_fields()
 	{
-		if ( !$this->can_create_feed() ) {
-			$message = sprintf(
-				/* Translators: %1$s = Gravity Forms Airtable settings page URL  */
-				__( 'Please visit the <a href="%1$s">plugin settings page</a> and enter a valid Airtable API key.', 'gravityformsagentbox' ),
-				admin_url( 'admin.php?page=gf_settings&subview=wpc-gravityforms-airtable' )
-			);
+		$field_options = $this->get_options();
+	
 
-			$fields = [ 
-				[ 
-					'name'  => 'at-api-key-invalid',
-					'label' => esc_html__( 'Access token missing or invalid', 'gravityformsagentbox' ),
-					'type'  => 'html',
-					'html'  => sprintf( '<p>%1$s</p>', $message ),
+		$fields = [ 
+			[ 
+				'name'     => 'name',
+				'label'    => esc_html__( 'Feed Name', 'gravityformsagentbox' ),
+				'type'     => 'text',
+				'required' => true,
+				'class'    => 'medium',
+				'tooltip'  => esc_html__( 'Enter a feed name to uniquely identify it.', 'gravityformsagentbox' ),
+			],
+			[ 
+				'name'        => 'mapped-fields',
+				'label'       => esc_html__( 'Fields Mapping', 'gravityformsagentbox' ),
+				'type'        => 'dynamic_field_map',
+				'required'    => true,
+				'value_field' => [ 
+					'title' => esc_html__( 'GravityForm Field Name', 'gravityformsagentbox' ),
 				],
-			];
-		} else {
-			$options        = $this->get_options();
-			$base           = $this->get_setting( 'appid' );
-			$table          = $this->get_setting( 'table' );
-			$default_table  = !empty( $options ) && isset( array_values( $options )[0]['tables'] ) ? array_values( $options )[0]['tables'] : [];
-			$table_options  = $base && isset( $options[ $base ]['tables'] ) ? $options[ $base ]['tables'] : $default_table;
-			$default_fields = !empty( $table_options ) && isset( array_values( $table_options )[0]['fields'] ) ? array_values( $table_options )[0]['fields'] : [];
-			$field_options  = $table && !empty( $table_options ) && isset( $table_options[ $table ]['fields'] ) ? $table_options[ $table ]['fields'] : $default_fields;
-
-			$messages = [ 
-				'base'  => [ 
-					'label'   => !empty( $options ) ? __( 'Base name', 'gravityformsagentbox' ) : __( 'App ID', 'gravityformsagentbox' ),
-					'tooltip' => !empty( $options ) ? __( 'Select the target database from the options belwo.', 'gravityformsagentbox' ) : __( 'Open your database on Airtable and look at the URL in your browser bar. The app ID is the part starting with ‘app’ and located between two slashes.', 'gravityformsagentbox' ),
+				'key_field'   => [ 
+					'title' => esc_html__( 'Agentbox Field Name', 'gravityformsagentbox' ),
 				],
-				'table' => [ 
-					'label'   => !empty( $options ) ? __( 'Table name', 'gravityformsagentbox' ) : __( 'Table ID', 'gravityformsagentbox' ),
-					'tooltip' => !empty( $options ) ? __( 'Select the target table from the options below.', 'gravityformsagentbox' ) : __( 'Enter the name of the table in which the new records will be created. You can also use the part starting with ‘tbl’ located between two slashes in the URL.', 'gravityformsagentbox' ),
-				],
-			];
-
-			$fields = [ 
-				[ 
-					'name'     => 'name',
-					'label'    => esc_html__( 'Feed Name', 'gravityformsagentbox' ),
-					'type'     => 'text',
-					'required' => true,
-					'class'    => 'medium',
-					'tooltip'  => esc_html__( 'Enter a feed name to uniquely identify it.', 'gravityformsagentbox' ),
-				],
-				[ 
-					'name'        => 'appid',
-					'label'       => esc_html( $messages['base']['label'] ),
-					'type'        => !empty( $options ) ? 'select' : 'text',
-					'required'    => true,
-					'class'       => 'medium',
-					'placeholder' => 'app',
-					'tooltip'     => esc_html( $messages['base']['tooltip'] ),
-					'choices'     => $options,
-					'onchange'    => !empty( $options ) ? 'WPC_GF_AT.onBaseChange()' : '',
-				],
-				[ 
-					'name'        => 'table',
-					'label'       => esc_html( $messages['table']['label'] ),
-					'type'        => !empty( $table_options ) ? 'select' : 'text',
-					'required'    => true,
-					'class'       => 'medium',
-					'placeholder' => 'tbl',
-					'tooltip'     => esc_html( $messages['table']['tooltip'] ),
-					'choices'     => $table_options,
-					'onchange'    => !empty( $options ) ? 'WPC_GF_AT.onTableChange()' : '',
-				],
-				[ 
-					'name'   => 'base-table-change-notice',
-					'type'   => 'html',
-					'hidden' => true,
-					'html'   => sprintf(
-						'<div class="notice inline notice-error"><p>%1$s</p></div>',
-						esc_html__( 'Please save these settings before mapping your fields.', 'gravityformsagentbox' ),
-					),
-				],
-				[ 
-					'name'              => 'mapped-fields',
-					'label'             => esc_html__( 'Fields Mapping', 'gravityformsagentbox' ),
-					'type'              => 'dynamic_field_map',
-					'required'          => true,
-					'value_field'       => [ 
-						'title' => esc_html__( 'Form field', 'gravityformsagentbox' ),
-					],
-					'key_field'         => [ 
-						'title' => esc_html__( 'Airtable Field Name', 'gravityformsagentbox' ),
-					],
-					'dependency'        => 'table',
-					'enable_custom_key' => empty( $field_options ),
-					'field_map'         => $field_options,
-					'tooltip'           => esc_html__( 'Add and select the form fields, then choose the Airtable column where to send each piece of data to. Make sure the column names are entered identically to your database.', 'gravityformsagentbox' ),
-				],
-				[ 
-					'name'  => 'mapping-troubleshooting',
-					'label' => esc_html__( 'Airtable records are not creating?', 'gravityformsagentbox' ),
-					'type'  => 'html',
-					'html'  => sprintf( '<p>%1$s</p>', wp_kses( __( 'To troubleshoot the issue, please go the entry detail page and check the "Airtable" block.<br>It will display any error encountered while creating records.', 'gravityformsagentbox' ), [ 'br' => [] ] ) ),
-				],
-			];
-		}
+				'dependency'  => '',
+				// 'enable_custom_key' => empty( $field_options ),
+				'field_map'         => $field_options,
+				'tooltip'     => esc_html__( 'Add and select the form fields, then choose the Agentbox column where to send each piece of data to. Make sure the column names are entered identically to your database.', 'gravityformsagentbox' ),
+			],
+			[ 
+				'name'  => 'mapping-troubleshooting',
+				'label' => esc_html__( 'Agentbox records are not creating?', 'gravityformsagentbox' ),
+				'type'  => 'html',
+				'html'  => sprintf( '<p>%1$s</p>', wp_kses( __( 'Contact <a href="mailto:webservices@stafflink.com.au">Stafflink Web Services</a> for more information', 'gravityformsagentbox' ), [ 'a' => [] ] ) ),
+			],
+		];
 
 		return [ 
 			[ 
-				'title'  => esc_html__( 'Integration with Airtable', 'gravityformsagentbox' ),
+				'title'  => esc_html__( 'Integration with Agentbox', 'gravityformsagentbox' ),
 				'fields' => $fields,
 			],
 			[ 
@@ -285,6 +221,20 @@ class GF_Agentbox extends GFFeedAddOn
 	}
 
 	/**
+	 * Define feeds table columns.
+	 *
+	 * @return array
+	 */
+	public function feed_list_columns()
+	{
+		return [ 
+			'name'           => esc_html__( 'Feed Name', 'wpc-gf-at' ),
+			'table'          => esc_html__( 'Agentbox Table', 'wpc-gf-at' ),
+			'has_conditions' => esc_html__( 'Condition(s)', 'wpc-gf-at' ),
+		];
+	}
+
+	/**
 	 * Getter for bases and tables options
 	 * 
 	 * @return  array
@@ -298,14 +248,44 @@ class GF_Agentbox extends GFFeedAddOn
 	}
 
 	/**
-	 * Build the array of bases and tables options
+	 * Build the mapping for options
 	 * 
 	 * @return  array  $options
 	 */
 	public function build_options()
 	{
-		$options = [];
-		
+		$options = [ 
+			'first_name' => [ 
+				'name'       => 'first_name',
+				'label'      => __( 'First Name', 'gravityformsagentbox' ),
+				'type'       => 'text',
+				'validation' => [ 
+					'required' => true,
+				],
+			],
+			'last_name' => [ 
+				'name'       => 'last_name',
+				'label'      => __( 'Last Name', 'gravityformsagentbox' ),
+				'type'       => 'text',
+			],
+			'email' => [ 
+				'name'       => 'email',
+				'label'      => __( 'Email', 'gravityformsagentbox' ),
+				'type'       => 'email',
+				'validation' => [ 
+					'required' => true,
+				],
+			],
+			'mobile' => [ 
+				'name'       => 'mobile',
+				'label'      => __( 'Mobile', 'gravityformsagentbox' ),
+				'type'       => 'text',
+				'validation' => [ 
+					'required' => true,
+				],
+			],
+		];
+
 		return $options;
 	}
 
