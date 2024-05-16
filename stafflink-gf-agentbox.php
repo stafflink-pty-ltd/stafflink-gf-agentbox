@@ -5,7 +5,7 @@
  * Description:     Allows pulling and pushing of data via the Agentbox API.
  * Author:          Matthew Neal
  * Author URI:      https://stafflink.com.au/
- * Text Domain:     agentbox-integration
+ * Text Domain:     gravityformsagentbox
  * Domain Path:     /languages
  * Version:         0.3.0
  *
@@ -18,11 +18,9 @@ if ( !defined( 'ABSPATH' ) ) {
 }
 
 require "vendor/autoload.php";
-$dotenv = Dotenv\Dotenv::createImmutable(ABSPATH);
-$dotenv->load();
 
 if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
-	
+
 	/**
 	 * The main slab class
 	 */
@@ -34,58 +32,62 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 		 *
 		 * @var string
 		 */
-		public $version = '0.3.0';
+		public static $version = '0.3.0';
 
 		/**
 		 * The plugin settings array.
 		 *
 		 * @var array
 		 */
-		public $settings = array();
+		public static $settings = array();
 
 		/**
 		 * The plugin data array.
 		 *
 		 * @var array
 		 */
-		public $data = array();
+		public static $data = array();
 
 		/**
 		 * Storage for class instances.
 		 *
 		 * @var array
 		 */
-		public $instances = array();
+		public static $instances = array();
 
 		/**
-		 * A dummy constructor to ensure GF_Agentbox_Bootstrap is only setup once.
+		 * Storage for class instances.
 		 *
-		 * @return  void
+		 * @var
 		 */
-		public function __construct()
-		{
-			// Do nothing.
-		}
+		public static $instance;
+
+		/**
+		 * Action array
+		 *
+		 * @var array
+		 */
+		public static $_actions = array();
 
 		/**
 		 * Sets up the GF_Agentbox_Bootstrap plugin.
 		 *
 		 * @return  void
 		 */
-		public function initialize()
+		public static function initialize()
 		{
 
 			// Define constants.
-			$this->define( 'GF_Agentbox_Bootstrap', true );
-			$this->define( 'GF_Agentbox_Bootstrap_PATH', plugin_dir_path( __FILE__ ) );
-			$this->define( 'GF_Agentbox_Bootstrap_BASENAME', plugin_basename( __FILE__ ) );
-			$this->define( 'GF_Agentbox_Bootstrap_VERSION', $this->version );
-			$this->define( 'GF_Agentbox_Bootstrap_MAJOR_VERSION', 1 );
+			self::define( 'GF_Agentbox_Bootstrap', true );
+			self::define( 'GF_Agentbox_Bootstrap_PATH', plugin_dir_path( __FILE__ ) );
+			self::define( 'GF_Agentbox_Bootstrap_BASENAME', plugin_basename( __FILE__ ) );
+			self::define( 'GF_Agentbox_Bootstrap_VERSION', self::$version );
+			self::define( 'GF_Agentbox_Bootstrap_MAJOR_VERSION', 1 );
 
 			// Define settings.
-			$this->settings = array(
+			self::$settings = array(
 				'name'               => __( 'Gravity Forms - Agentbox Integration', 'GF_Agentbox_Bootstrap' ),
-				'slug'               => 'stafflink-gf-agentbox',
+				'slug'               => 'gravityformsagentbox',
 				'version'            => GF_Agentbox_Bootstrap_VERSION,
 				'basename'           => GF_Agentbox_Bootstrap_BASENAME,
 				'path'               => GF_Agentbox_Bootstrap_PATH,
@@ -104,47 +106,28 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 
 			// Include utility functions. 
 			// require_once dirname( __FILE__ ) . '/classes/class-agentbox-integration.php';
-			// require_once dirname( __FILE__ ) . '/classes/class-gravity-form-integration.php';
+			require_once dirname( __FILE__ ) . '/classes/Agentbox/class-agentbox-gf-feed-addon.php';
+
 
 			// Include admin.
 			if ( is_admin() ) {
-				require_once dirname( __FILE__ ) . '/classes/inc/abstract-class-connection.php';
-				require_once dirname( __FILE__ ) . '/classes/inc/interface-connection.php';
-				require_once dirname( __FILE__ ) . '/classes/inc/class-endpoint-configuration.php';
-				require_once dirname( __FILE__ ) . '/classes/agentbox/class-agentbox-client.php';
-
-				$agentbox = new GFAgentbox\Agentbox\AgentBoxClient;
-
-				$body = [
-					"enquiry" => [
-						"comment" => 'test',
-						"source" => "website",
-						"attachedContact" => [
-							"firstName" => 'Amiel',
-							"lastName" => 'Stafflink',
-							"email" => 'amiel@stafflink.com.au',
-							"mobile" => '1231231231',
-						]
-					]
-				];
-				
-				$test = $agentbox->post('enquiries', $body );
-
-				// var_dump($test);
-				// exit;
-				
-				// $agentbox->get( '', array( 'email' => 'test@test.com' ) );
+			// 	require_once dirname( __FILE__ ) . '/classes/inc/abstract-class-connection.php';
+			// 	require_once dirname( __FILE__ ) . '/classes/inc/interface-connection.php';
+			// 	require_once dirname( __FILE__ ) . '/classes/inc/class-endpoint-configuration.php';
 			}
+
+			// Define Hook
+			self::action( 'gform_loaded', self::register_addon() );
 		}
 
 		/**
+		 * @TODO
 		 * Completes the setup process on "init" of earlier.
 		 *
 		 * @return  void
 		 */
-		public function init()
+		public static function init()
 		{
-
 			// Bail early if called directly from functions.php or plugin file.
 			if ( !did_action( 'plugins_loaded' ) ) {
 				return;
@@ -162,6 +145,44 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 		}
 
 		/**
+		 * Undocumented function
+		 *
+		 * @return void
+		 */
+		public static function register_addon()
+		{
+			if ( !method_exists( 'GFForms', 'include_addon_framework' ) ) {
+				return;
+			}
+
+			GFAddOn::register( 'GF_Agentbox' );
+		}
+ 
+		public static function create_actions()
+		{
+			$_actions = self::$_actions;
+
+			foreach( $_actions as $_action ) {
+				add_action( $_action['hook'], $_action['callback'], $_action['priority'], $_action['accepted_args'] );
+			}
+		}
+
+		/**
+		 *  Register plugin actions of this plugin
+		 *
+		 * @param string $hook
+		 * @param callable $callback
+		 * @param integer $priority (optional)
+		 * @param integer $accepted_args (optional)
+		 * @return void
+		 */
+		public static function action( $hook, $callback, $priority = 10, $accepted_args = 1 )
+		{
+			self::$_actions[] = array_merge( compact( 'hook', 'callback', 'priority', 'accepted_args' ) );
+		}
+
+
+		/**
 		 * Defines a constant if doesnt already exist.
 		 *
 		 *
@@ -169,7 +190,7 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 		 * @param   mixed  $value The constant value.
 		 * @return  void
 		 */
-		public function define( $name, $value = true )
+		public static function define( $name, $value = true )
 		{
 			if ( !defined( $name ) ) {
 				define( $name, $value );
@@ -182,9 +203,9 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 		 * @param   string $name The setting name.
 		 * @return  boolean
 		 */
-		public function has_setting( $name )
+		public static function has_setting( $name )
 		{
-			return isset( $this->settings[ $name ] );
+			return isset( self::$settings[ $name ] );
 		}
 
 		/**
@@ -193,9 +214,9 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 		 * @param   string $name The setting name.
 		 * @return  mixed
 		 */
-		public function get_setting( $name )
+		public static function get_setting( $name )
 		{
-			return isset( $this->settings[ $name ] ) ? $this->settings[ $name ] : null;
+			return isset( self::$settings[ $name ] ) ? self::$settings[ $name ] : null;
 		}
 
 		/**
@@ -205,9 +226,9 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 		 * @param   mixed  $value The setting value.
 		 * @return  true
 		 */
-		public function update_setting( $name, $value )
+		public static function update_setting( $name, $value )
 		{
-			$this->settings[ $name ] = $value;
+			self::$settings[ $name ] = $value;
 			return true;
 		}
 
@@ -219,7 +240,7 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 		 */
 		public function get_data( $name )
 		{
-			return isset( $this->data[ $name ] ) ? $this->data[ $name ] : null;
+			return isset( self::$data[ $name ] ) ? self::$data[ $name ] : null;
 		}
 
 		/**
@@ -231,7 +252,7 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 		 */
 		public function set_data( $name, $value )
 		{
-			$this->data[ $name ] = $value;
+			self::$data[ $name ] = $value;
 		}
 
 		/**
@@ -240,10 +261,25 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 		 * @param   string $class The instance class name.
 		 * @return  object
 		 */
-		public function get_instance( $class )
+		public static function get_instance( $class )
 		{
 			$name = strtolower( $class );
-			return isset( $this->instances[ $name ] ) ? $this->instances[ $name ] : null;
+			return isset( self::$instances[ $name ] ) ? self::$instances[ $name ] : null;
+		}
+
+		/**
+		 * Undocumented function
+		 *
+		 * @return GF_Agentbox_Bootstrap
+		 */
+		public static function instance()
+		{
+			//Check for Instance
+			if ( self::$instance === null ) {
+				return self::$instance = new self;
+			}
+
+			return self::$instance;
 		}
 
 		/**
@@ -254,34 +290,14 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 		 */
 		public function new_instance( $class )
 		{
-			$instance                 = new $class();
-			$name                     = strtolower( $class );
-			$this->instances[ $name ] = $instance;
+			$instance                = new $class();
+			$name                    = strtolower( $class );
+			self::$instances[ $name ] = $instance;
 			return $instance;
 		}
 	}
 
-	/**
-	 * The main function responsible for returning the one true GF_Agentbox_Bootstrap Instance to functions everywhere.
-	 * Use this function like you would a global variable, except without needing to declare the global.
-	 *
-	 * Example: <?php $GF_Agentbox_Bootstrap = GF_Agentbox_Bootstrap(); ?>
-	 *
-	 * @return  GF_Agentbox_Bootstrap
-	 */
-	function GF_Agentbox_Bootstrap()
-	{
-		global $GF_Agentbox_Bootstrap;
+	GF_Agentbox_Bootstrap::initialize();
 
-		// Instantiate only once.
-		if ( !isset( $GF_Agentbox_Bootstrap ) ) {
-			$GF_Agentbox_Bootstrap = new GF_Agentbox_Bootstrap();
-			$GF_Agentbox_Bootstrap->initialize();
-		}
-		return $GF_Agentbox_Bootstrap;
-	}
-
-	// Instantiate.
-	GF_Agentbox_Bootstrap();
 
 } // class_exists check

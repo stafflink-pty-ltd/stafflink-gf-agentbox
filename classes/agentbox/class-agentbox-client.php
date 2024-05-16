@@ -28,8 +28,8 @@ class AgentBoxClient extends Base_Connection implements ConnectionInterface
                 'headers' => [ 
                     'Content-Type' => 'application/json',
                     'Accept'       => 'application/json',
-                    'X-Client-ID'  => $_ENV['AGENTBOX_CLIENT_ID'],
-                    'X-API-Key'    => $_ENV['AGENTBOX_CLIENT_SECRET'],
+                    'X-Client-ID'  => AGENTBOX_CLIENT_ID,
+                    'X-API-Key'    => AGENTBOX_CLIENT_SECRET,
                 ],
                 'params'  => [ 
                     'page'  => 1,
