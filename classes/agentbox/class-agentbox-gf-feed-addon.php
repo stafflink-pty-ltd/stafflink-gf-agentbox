@@ -97,7 +97,7 @@ class GF_Agentbox extends GFFeedAddOn
 	protected $_async_feed_processing = true;
 
 	/**
-	 * Returns an instance of this class then stores it in the $_instance propety;
+	 * Returns an instance of this class then stores it in the $_instance property;
 	 *
 	 * @return GF_Agentbox;
 	 */
@@ -127,7 +127,6 @@ class GF_Agentbox extends GFFeedAddOn
 	 */
 	public function plugin_settings_fields()
 	{
-		var_dump( 'addon_settings' );
 		$settings = [ 
 			[ 
 				'title'  => esc_html__( 'Agentbox Add-On Settings', 'gravityformsagentbox' ),
@@ -162,7 +161,7 @@ class GF_Agentbox extends GFFeedAddOn
 	public function feed_settings_fields()
 	{
 		$field_options = $this->get_options();
-	
+
 
 		$fields = [ 
 			[ 
@@ -186,7 +185,7 @@ class GF_Agentbox extends GFFeedAddOn
 				],
 				'dependency'  => '',
 				// 'enable_custom_key' => empty( $field_options ),
-				'field_map'         => $field_options,
+				'field_map'   => $field_options,
 				'tooltip'     => esc_html__( 'Add and select the form fields, then choose the Agentbox column where to send each piece of data to. Make sure the column names are entered identically to your database.', 'gravityformsagentbox' ),
 			],
 			[ 
@@ -259,12 +258,12 @@ class GF_Agentbox extends GFFeedAddOn
 					'required' => true,
 				],
 			],
-			'last_name' => [ 
-				'name'       => 'last_name',
-				'label'      => __( 'Last Name', 'gravityformsagentbox' ),
-				'type'       => 'text',
+			'last_name'  => [ 
+				'name'  => 'last_name',
+				'label' => __( 'Last Name', 'gravityformsagentbox' ),
+				'type'  => 'text',
 			],
-			'email' => [ 
+			'email'      => [ 
 				'name'       => 'email',
 				'label'      => __( 'Email', 'gravityformsagentbox' ),
 				'type'       => 'email',
@@ -272,7 +271,7 @@ class GF_Agentbox extends GFFeedAddOn
 					'required' => true,
 				],
 			],
-			'mobile' => [ 
+			'mobile'     => [ 
 				'name'       => 'mobile',
 				'label'      => __( 'Mobile', 'gravityformsagentbox' ),
 				'type'       => 'text',
