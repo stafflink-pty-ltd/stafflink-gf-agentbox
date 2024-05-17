@@ -34,9 +34,28 @@ class AgentboxContact {
      */
     protected $_request_type;
 
-    public function __construct( $contact )
+    /**
+     * Class Constructor
+     *
+     * @param [type] $contact
+     * @param string $request_type
+     */
+    public function __construct( $contact, $request_type = 'enquiry' )
     {
         $this->_contact = $contact;
+        $this->_request_type = $request_type;
+    }
+
+    /**
+     * Get the current contact state
+     * 
+     * @param string $request_type
+     *
+     * @return void
+     */
+    public function get( $request_type = '' )
+    {
+        return ! empty( $this->_contact ) ? $this->_contact : $this->create_body( $this->_request_type );
     }
 
     /**
@@ -47,6 +66,9 @@ class AgentboxContact {
     public function create_body( $request_type ) : array
     {
         $this->_request_type = $request_type;
+
+        // replace existing contact when re-creating the body
+        $this->_contact = [];
 
         return [
 

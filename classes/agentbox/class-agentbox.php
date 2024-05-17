@@ -7,7 +7,6 @@ use GFAgentbox\Agentbox\AgentboxContact;
 
 class AgentboxClass
 {
-
     /**
      * AgentboxContact
      *
@@ -57,7 +56,16 @@ class AgentboxClass
      */
     protected $_options = [
         'return_type' => 'object',
+        'attached_listing' => true,
+        'contact_class_appendable' => true,
     ];
+
+    /**
+     * Additional objects to be included in the Agentbox response
+     *
+     * @var array
+     */
+    protected $_includes = [];
 
 
     /**
@@ -83,19 +91,15 @@ class AgentboxClass
      */
     public function enquiries()
     {
-        $client  = new AgentBoxClient();
-        $contact = new AgentboxContact( $this->_feed );
-        $body    = $contact->create_body( 'enquiry' );
+        $request_type = 'enquiry';
+        $client       = new AgentBoxClient();
+        $body         = $this->_state->get( $request_type );
 
         // Create post request for enquiries
         $req = $client->post( 'enquiry', $body );
         $this->save_steps( 'Create post request for enquiries ', $req );
 
-        // Attach property id to the enquiry if property_id is available
-        if( isset( $this->_feed['property_id'] ) ) {
-            $body['enquiry']['attachedListing']['id'] = $this->_feed['property_id'];
-            $body['enquiry']['attachedContact']['actions']['attachListingAgents'] = true;
-        }
+        
 
         // Attach Primary Owner
         if( isset( $this->_feed['agent_id'] ) ) {
@@ -109,9 +113,13 @@ class AgentboxClass
     }
 
 
-    public function has_property()
+    public function attach_property()
     {
-
+        // Attach property id to the enquiry if property_id is available
+        if(  rgar( $this->_feed, 'property_id') )  {
+            $body['enquiry']['attachedListing']['id'] = $this->_feed['property_id'];
+            $body['enquiry']['attachedContact']['actions']['attachListingAgents'] = true;
+        }
     }
 
     // public function 
