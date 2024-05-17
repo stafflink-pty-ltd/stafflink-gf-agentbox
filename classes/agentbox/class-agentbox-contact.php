@@ -111,7 +111,11 @@ class AgentboxContact {
 
     protected function attach_listing()
     {
-
+        // Attach property id to the enquiry if property_id is available
+        if(  rgar( $this->_contact, 'property_id') )  {
+            // $body['enquiry']['attachedListing']['id'] = $this->_contact['property_id'];
+            // $body['enquiry']['attachedContact']['actions']['attachListingAgents'] = true;
+        }
     }
 
     protected function attach_agent( $contact )
