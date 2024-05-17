@@ -223,9 +223,9 @@ class GF_Agentbox extends GFFeedAddOn
 	public function feed_list_columns()
 	{
 		return [ 
-			'name'           => esc_html__( 'Feed Name', 'wpc-gf-at' ),
-			'table'          => esc_html__( 'Agentbox Table', 'wpc-gf-at' ),
-			'has_conditions' => esc_html__( 'Condition(s)', 'wpc-gf-at' ),
+			'name'           => esc_html__( 'Feed Name', 'gravityformsagentbox' ),
+			'table'          => esc_html__( 'Agentbox Table', 'gravityformsagentbox' ),
+			'has_conditions' => esc_html__( 'Condition(s)', 'gravityformsagentbox' ),
 		];
 	}
 

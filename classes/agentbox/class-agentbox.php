@@ -9,26 +9,18 @@ class AgentboxClass
 {
 
     /**
-     * Current body being processed
+     * AgentboxContact
      *
-     * @var array
+     * @var AgentboxClient
      */
-    protected $_current_body = [];
-
+    protected $_state = [];
+    
     /**
-     * Initial body passed via constructor
+     * Save the initial feed passed to the class
      *
      * @var array
      */
-    protected $_body = [];
-
-    /**
-     * Save client response for future use
-     *
-     * @var array
-     */
-    protected $_client_response = [];
-
+    protected $_feed = [];
 
     /**
      * Record the steps that we did.
@@ -37,33 +29,50 @@ class AgentboxClass
      */
     protected $_steps = [];
 
+    /**
+     * Log errors for future purposes
+     *
+     * @var array
+     */
+    protected $_errors = [];
 
     /**
-     * Agentbox payload source
+     * Create logs of what the Agentbox stuff is doing
+     *
+     * @var boolean
+     */
+    protected $_logging = true;
+
+    /**
+     * Agentbox payload source, defaults to website
      *
      * @var string
      */
     protected $_source;
 
     /**
-     * Feed passed from Gravity Forms
+     * Class options
      *
      * @var array
      */
-    protected $_gform_feed = [];
+    protected $_options = [
+        'return_type' => 'object',
+    ];
 
 
     /**
      * Agentbox class constructor
      *
-     * @param array $gform_feed
-     * @param string $source
+     * @param array $feed
+     * @param string $source Default value: 'website'
+     * @param array $options
      */
-    public function __construct( $gform_feed = [], $source = "website" )
+    public function __construct( $feed = [], $source = "website", $options = [] )
     {
-        // $this->_attached_contact = 
-        $this->_gform_feed = $gform_feed;
-        $this->_source     = $source;
+        $this->_feed    = $feed;
+        $this->_source  = $source;
+        $this->_options = array_merge( $this->_options, $options );
+        $this->_state   = new AgentboxContact( $feed );
     }
 
 
@@ -74,20 +83,83 @@ class AgentboxClass
      */
     public function enquiries()
     {
+        $client  = new AgentBoxClient();
+        $contact = new AgentboxContact( $this->_feed );
+        $body    = $contact->create_body( 'enquiry' );
+
+        // Create post request for enquiries
+        $req = $client->post( 'enquiry', $body );
+        $this->save_steps( 'Create post request for enquiries ', $req );
+
+        // Attach property id to the enquiry if property_id is available
+        if( isset( $this->_feed['property_id'] ) ) {
+            $body['enquiry']['attachedListing']['id'] = $this->_feed['property_id'];
+            $body['enquiry']['attachedContact']['actions']['attachListingAgents'] = true;
+        }
+
+        // Attach Primary Owner
+        if( isset( $this->_feed['agent_id'] ) ) {
+
+        }
+    }
+
+    public function inlude() 
+    {
+
+    }
+
+
+    public function has_property()
+    {
+
+    }
+
+    // public function 
+
+    public function contact( $email )
+    {
+        
+    }
+
+    public function response( $options = [] )
+    {
+
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param string $member_id
+     * @return array
+     */
+    public function get_staff( $member_id = "" )
+    {
         $client = new AgentBoxClient();
-    }
 
-    protected function create_body()
+        $req = $client->get( 'staff', array( 'email' => $member_id));
+
+
+
+        return [];
+    }
+    
+
+    // LOGGING AND STUFF
+
+    /**
+     * Save the steps for future logging purposes
+     *
+     * @param string $message
+     * @param string|array $additional_information
+     * @return void
+     */
+    protected function save_steps( $message, $additional_information )
     {
-
+        $this->_steps[] = compact( 'message', 'additional_information');
     }
 
 
-    protected function create_comment( $body = [] )
-    {
-
-    }
-
+    //GETTERS AND SETTERS
 
     /**
      * Set the source of the Agentbox payload
