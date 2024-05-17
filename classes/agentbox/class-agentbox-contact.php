@@ -113,4 +113,9 @@ class AgentboxContact {
     {
 
     }
+
+    protected function attach_agent( $contact )
+    {
+        
+    }
 }

@@ -77,9 +77,10 @@ class AgentBoxClient extends Base_Connection implements ConnectionInterface
      *
      * @param string $resource Request resource
      * @param array $options REQUEST method and headers
+     * @param array $include Additional object in the response
      * @return string|array Returns either a JSON string or an array
      */
-    public function get( $resource, $filters = [] ): string|array
+    public function get( $resource, $filters = [], $include = [] ): string|array
     {
         // Set the filters to be used then create the endpoint for the GET request
         $this->config->set( [ 'filters' => $filters ] );

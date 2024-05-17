@@ -55,9 +55,10 @@ class AgentboxClass
      * @var array
      */
     protected $_options = [
-        'return_type' => 'object',
-        'attached_listing' => true,
-        'contact_class_appendable' => true,
+        'return_type'                => 'object',
+        'attached_listing'           => true,
+        'contact_class_appendable'   => true, // Used for contact classes saving
+        'save_primary_owner_default' => true // Used for using default OC behavior in saving and checking for primary owners
     ];
 
     /**
@@ -93,21 +94,62 @@ class AgentboxClass
     {
         $request_type = 'enquiry';
         $client       = new AgentBoxClient();
-        $body         = $this->_state->get( $request_type );
+        
+        // Default behavior: 
+        // Check if contact already has a primary owner.
+        // Check if there is an agent attached to the feed
+        // Check if there is a default agent saved in the settings
+        if( $this->_options['save_primary_owner_default'] ) {
+            $contact = $this->contacts( [''] );
+            $this->_state->attach_agent( $contact );
+        }
+
 
         // Create post request for enquiries
+        $body         = $this->_state->get( $request_type );
         $req = $client->post( 'enquiry', $body );
-        $this->save_steps( 'Create post request for enquiries ', $req );
 
-        
+        $this->save_steps( 'Enquiry', 'Create post request for enquiries ', $req );
+    }
 
-        // Attach Primary Owner
-        if( isset( $this->_feed['agent_id'] ) ) {
+    /**
+     * Create contact endpoint request to Agentbox
+     *
+     * @param array|string $info variable used as filter or as contact id depending on what was passed
+     * @return array
+     */
+    public function contacts( $request = 'get', $info, $include = [] )
+    {
+        $client = new AgentBoxClient();
+        $include = empty( $include ) ? $this->_includes : $include;
 
+        // Pass the information as filter
+        // see filters  for contacts in Agentbox
+        if( is_array( $info ) && ! empty( $info ) ) {
+
+            $contact = $client->{$request}( 'contacts', $info, $include );
+            $this->save_steps( 'Contacts', '', $contact);
+
+            return $contact;
         }
+
+        // Do the request for information passed as contact id
+        $contact = $client->{$request}( "contact/{$info}", [], $include );
+
+        return $contact;
+    }
+
+    public function staff()
+    {
+
     }
 
     public function inlude() 
+    {
+
+    }
+
+    public function attach_agent()
     {
 
     }
@@ -120,13 +162,6 @@ class AgentboxClass
             $body['enquiry']['attachedListing']['id'] = $this->_feed['property_id'];
             $body['enquiry']['attachedContact']['actions']['attachListingAgents'] = true;
         }
-    }
-
-    // public function 
-
-    public function contact( $email )
-    {
-        
     }
 
     public function response( $options = [] )
@@ -161,9 +196,9 @@ class AgentboxClass
      * @param string|array $additional_information
      * @return void
      */
-    protected function save_steps( $message, $additional_information )
+    protected function save_steps( $key, $additional_information, $http_response )
     {
-        $this->_steps[] = compact( 'message', 'additional_information');
+        $this->_steps[] = compact( 'key', 'additional_information', 'http_response');
     }
 
 
