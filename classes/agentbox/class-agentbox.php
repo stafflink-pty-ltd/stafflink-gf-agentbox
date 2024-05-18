@@ -5,6 +5,14 @@ namespace GFAgentbox\Agentbox;
 use GFAgentbox\Agentbox\AgentBoxClient;
 use GFAgentbox\Agentbox\AgentboxContact;
 
+/**
+ * AGENTBOX WRAPPER CLASS
+ * 
+ * Each Agentbox endpoints are represented by methods.
+ * We will only add methods here if the plugin requires you to, as of now
+ * not all endpoints are being used to integration with agentbox, we don't
+ * need to add them all.
+ */
 class AgentboxClass
 {
     /**

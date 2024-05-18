@@ -4,6 +4,12 @@ namespace GFAgentbox\Agentbox;
 
 use GFAgentbox\Agentbox\AgentBoxClient;
 
+/**
+ * AGENTBOX CONTACT CLASS
+ * 
+ * This class is used as a state management for the inital contact/feed that the user
+ * sent through gravity forms. This also serves as the class for the enquiry/contact done.
+ */
 class AgentboxContact
 {
 
