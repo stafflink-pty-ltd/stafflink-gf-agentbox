@@ -22,11 +22,11 @@ class AgentboxClass
     protected $_feed = [];
 
     /**
-     * Record the steps that we did.
+     * Record the transactions that we did.
      *
      * @var array
      */
-    protected $_steps = [];
+    protected $_transactions = [];
 
     /**
      * Log errors for future purposes
@@ -110,19 +110,19 @@ class AgentboxClass
         $body = $this->_state->get( $request_type );
         $req  = $client->post( 'enquiry', $body );
 
-        $this->save_steps( 'Enquiry', 'Create post request for enquiries ', $req );
+        $this->save_transactions( 'Enquiry', 'Create post request for enquiries ', $req );
     }
 
     /**
      * Create contact endpoint request to Agentbox
      *
-     * @param string $request Http Request type
      * @param array|string $info variable used as filter or as contact id depending on what was passed
-     * @param array $include additional information added to response
+     * @param string $request Http Request type. Default: 'get'
+     * @param array $include (optional)  additional information added to response
      * 
      * @return array
      */
-    public function contacts( $request = 'get', $info, $include = [] )
+    public function contacts( $info, $request = 'get', $include = [] )
     {
         $client  = new AgentBoxClient();
         $include = empty( $include ) ? $this->_includes : $include;
@@ -132,7 +132,7 @@ class AgentboxClass
         if ( is_array( $info ) && !empty( $info ) ) {
 
             $contact = $client->{$request}( 'contacts', $info, $include );
-            $this->save_steps( 'Contacts', '', $contact );
+            $this->save_transactions( 'Contacts', '', $contact );
 
             return $contact;
         }
@@ -161,7 +161,7 @@ class AgentboxClass
         if ( is_array( $info ) && !empty( $info ) ) {
 
             $staff = $client->get( 'staff', $info, $include );
-            $this->save_steps( 'Contacts', '', $staff );
+            $this->save_transactions( 'Contacts', '', $staff );
 
             return $staff;
         }
@@ -192,7 +192,17 @@ class AgentboxClass
      */
     public function response( $options = [] )
     {
+        if( isset( $options['response_type'] ) && 'json' == $options['response_type'] ) {
 
+        }
+
+        if( isset( $options['response_type'] ) && 'array' == $options['response_type'] ) {
+
+        }
+
+        if( isset( $options['response_type'] ) && 'object' == $options['response_type'] ) {
+
+        }
     }
 
     /**
@@ -221,7 +231,7 @@ class AgentboxClass
      * @param string|array $additional_information
      * @return void
      */
-    protected function save_steps( $key, $additional_information, $http_response )
+    protected function save_transactions( $key, $additional_information, $http_response )
     {
         $this->_steps[] = compact( 'key', 'additional_information', 'http_response' );
     }

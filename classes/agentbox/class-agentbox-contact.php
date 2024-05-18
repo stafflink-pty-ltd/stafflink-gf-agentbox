@@ -1,10 +1,11 @@
-<?php 
+<?php
 
 namespace GFAgentbox\Agentbox;
 
 use GFAgentbox\Agentbox\AgentBoxClient;
 
-class AgentboxContact {
+class AgentboxContact
+{
 
     /**
      * Agentbox Contact
@@ -12,6 +13,14 @@ class AgentboxContact {
      * @var array
      */
     protected $_contact = array();
+
+
+    /**
+     * Storage for the inital contact that was sent by the Gravity Form feed
+     *
+     * @var array
+     */
+    protected $_initial_contact = array();
 
     /**
      * Primary owner of the contact
@@ -42,8 +51,9 @@ class AgentboxContact {
      */
     public function __construct( $contact, $request_type = 'enquiry' )
     {
-        $this->_contact = $contact;
-        $this->_request_type = $request_type;
+        $this->_initial_contact = $contact;
+        $this->_contact         = $contact;
+        $this->_request_type    = $request_type;
     }
 
     /**
@@ -55,7 +65,7 @@ class AgentboxContact {
      */
     public function get( $request_type = '' )
     {
-        return ! empty( $this->_contact ) ? $this->_contact : $this->create_body( $this->_request_type );
+        return !empty( $this->_contact ) ? $this->_contact : $this->create_body( $this->_request_type );
     }
 
     /**
@@ -63,7 +73,7 @@ class AgentboxContact {
      *
      * @return array
      */
-    public function create_body( $request_type ) : array
+    public function create_body( $request_type ): array
     {
         $this->_request_type = $request_type;
 
@@ -80,16 +90,18 @@ class AgentboxContact {
      *
      * @return string
      */
-    public function create_comment() : string
+    public function create_comment(): string
     {
         $title = ucfirst( $this->_request_type );
 
         // Comment header
-        $comment = "{$title} Details:" . PHP_EOL;;
+        $comment = "{$title} Details:" . PHP_EOL;
+        ;
 
         // Create comment body
-        foreach( $this->_contact as $type => $value ) {
-            $comment .= "{$type}: {$value}" . PHP_EOL;;
+        foreach ( $this->_contact as $type => $value ) {
+            $comment .= "{$type}: {$value}" . PHP_EOL;
+            ;
         }
 
         // Write commen footer
@@ -103,16 +115,16 @@ class AgentboxContact {
      *
      * @return string
      */
-    public function get_comment() : string
+    public function get_comment(): string
     {
-        return $this->_comment ==  "" ? $this->create_comment() : $this->_comment;
+        return $this->_comment == "" ? $this->create_comment() : $this->_comment;
     }
 
 
     protected function attach_listing()
     {
         // Attach property id to the enquiry if property_id is available
-        if(  rgar( $this->_contact, 'property_id') )  {
+        if ( rgar( $this->_contact, 'property_id' ) ) {
             // $body['enquiry']['attachedListing']['id'] = $this->_contact['property_id'];
             // $body['enquiry']['attachedContact']['actions']['attachListingAgents'] = true;
         }
@@ -120,6 +132,11 @@ class AgentboxContact {
 
     protected function attach_agent( $contact )
     {
-        
+
+    }
+
+    protected function attach_project()
+    {
+
     }
 }
