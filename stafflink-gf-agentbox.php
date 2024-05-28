@@ -3,11 +3,11 @@
  * Plugin Name:     Gravity Forms - Agentbox Integration
  * Plugin URI:      https://stafflink.com.au/
  * Description:     Allows pulling and pushing of data via the Agentbox API.
- * Author:          Matthew Neal
+ * Author:          Stafflink Web Services
  * Author URI:      https://stafflink.com.au/
  * Text Domain:     gravityformsagentbox
  * Domain Path:     /languages
- * Version:         0.3.0
+ * Version:         1.0.0
  *
  * @package         SLAB
  */
@@ -83,6 +83,7 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 			self::define( 'GF_Agentbox_Bootstrap_BASENAME', plugin_basename( __FILE__ ) );
 			self::define( 'GF_Agentbox_Bootstrap_VERSION', self::$version );
 			self::define( 'GF_Agentbox_Bootstrap_MAJOR_VERSION', 1 );
+			self::define( 'GF_Agentbox_assets', plugin_dir_url(__FILE__) );
 
 			// Define settings.
 			self::$settings = array(
@@ -105,15 +106,13 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 			);
 
 			// Include utility functions. 
-			// require_once dirname( __FILE__ ) . '/classes/class-agentbox-integration.php';
+	
 			require_once dirname( __FILE__ ) . '/classes/Agentbox/class-agentbox-gf-feed-addon.php';
 
 
 			// Include admin.
 			if ( is_admin() ) {
-			// 	require_once dirname( __FILE__ ) . '/classes/inc/abstract-class-connection.php';
-			// 	require_once dirname( __FILE__ ) . '/classes/inc/interface-connection.php';
-			// 	require_once dirname( __FILE__ ) . '/classes/inc/class-endpoint-configuration.php';
+	
 			}
 
 			// Define Hook
