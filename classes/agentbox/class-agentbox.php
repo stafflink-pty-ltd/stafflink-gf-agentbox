@@ -67,7 +67,7 @@ class AgentboxClass
         'attached_listing'           => true,
         'contact_class_appendable'   => true, // Used for contact classes saving
         'save_primary_owner_default' => true, // Used for using default OC behavior in saving and checking for primary owners
-        'related_staff_appendable'   => true, // When set to false staff member will be overriden, when set to true related staff will be appended
+        'related_staff_appendable'   => true, // When set to false staff member will be overridden, when set to true related staff will be appended
     ];
 
     /**
@@ -123,6 +123,8 @@ class AgentboxClass
 
     /**
      * Create contact endpoint request to Agentbox
+     * 
+     * HTTP Requests: GET, POST, PUT
      *
      * @param array|string $info variable used as filter or as contact id depending on what was passed
      * @param string $request Http Request type. Default: 'get'
@@ -153,6 +155,8 @@ class AgentboxClass
 
     /**
      * Returns staff member records
+     * 
+     * HTTP Requests: GET
      *
      * @param array|string $info variable used as filter or as contact id depending on what was passed
      * @param array $include (optional) additional information added to response
@@ -181,9 +185,48 @@ class AgentboxClass
     }
 
     /**
-     * Add Agentbox includes
+     * Returns a set of contact classes
+     * 
+     * HTTP Requests: GET
+     * 
+     * @param string $filter (optional) Fitler results by contact classes
+     * @param array $include (optional) Output addtional object in the response
+     *
+     * @return void
+     */
+    public function contact_classes( $filter = "", $include = [] )
+    {
+        $client = new AgentBoxClient();
+        $include = empty( $include ) ? $this->_includes : $include;
+
+        
+
+    }
+
+
+    /**
+     * Returns a recrod of projects
+     *
+     * @param string $project_id (optional) Unique project id
+     * @param array $includes (optional) Output additional objects in the response.
+     * 
+     * @return array
+     */
+    public function projects( $project_id = null, $includes = [] )
+    {
+        $client = new AgentBoxClient();
+        $include = empty( $include ) ? $this->_includes : $include;
+
+        $endpoint = ( $project_id ) ? "projects" : "projects/{$project_id}";
+
+        $project = $client->get( $endpoint );
+    }
+
+    /**
+     * Add Agentbox includes, using this will replace the include array everytime.
      *
      * @param array $includes
+     * 
      * @return void
      */
     public function inlude( $includes = [] )
@@ -191,11 +234,11 @@ class AgentboxClass
         $this->_include = $includes;
     }
 
-
     /**
      * Get the result of the chained queries
      *
      * @param array $options response type
+     * 
      * @return void
      */
     public function response( $options = [] )
@@ -237,6 +280,7 @@ class AgentboxClass
      *
      * @param string $message
      * @param string|array $additional_information
+     * 
      * @return void
      */
     protected function save_transactions( $key, $additional_information, $http_response )
@@ -251,6 +295,7 @@ class AgentboxClass
      * Set the source of the Agentbox payload
      *
      * @param string $source
+     * 
      * @return void
      */
     public function set_source( $source )
