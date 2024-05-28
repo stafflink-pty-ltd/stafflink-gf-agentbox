@@ -42,7 +42,7 @@ class StafflinkLogger
      */
     public function set_log_file( $file_path )
     {
-        return ( $file_path !== "" ) ? WP_CONTENT_DIR . "/logs/{$this->log_name}.log" : $file_path;
+        return ( $file_path == "" ) ? WP_CONTENT_DIR . "/{$this->log_name}.log" : $file_path;
     }
 
 
