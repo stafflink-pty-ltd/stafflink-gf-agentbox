@@ -17,7 +17,7 @@ class StafflinkLogger
     /**
      * File name of the log file
      *
-     * @var [type]
+     * @var string
      */
     protected $log_name;
 
@@ -27,16 +27,22 @@ class StafflinkLogger
      * @param string $file_path
      * @param string $log_name
      */
-    public function __construct( $file_path = "", $log_name = "Stafflink" )
+    public function __construct( $file_path = "", $log_name = "sl_debug" )
     {
         $this->log_name = $log_name;
         // create the log file
-        $this->log_file = ( $file_path !== "" ) ? WP_CONTENT_DIR : $file_path;
+        $this->log_file = $this->set_log_file( $file_path );
     }
 
-    public function set_log_file()
+    /**
+     * Set the log file and path
+     *
+     * @param string $file_path
+     * @return string
+     */
+    public function set_log_file( $file_path )
     {
-        
+        return ( $file_path !== "" ) ? WP_CONTENT_DIR . "/logs/{$this->log_name}.log" : $file_path;
     }
 
 
