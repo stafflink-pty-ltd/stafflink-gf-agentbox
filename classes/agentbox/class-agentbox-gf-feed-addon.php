@@ -119,7 +119,7 @@ class GF_Agentbox extends GFFeedAddOn
 	{
 		if ( self::$_instance == null ) {
 			self::$_instance = new GF_Agentbox;
-			self::$logger = new StafflinkLogger;
+			self::$logger    = new StafflinkLogger;
 		}
 
 		return self::$_instance;
@@ -325,7 +325,7 @@ class GF_Agentbox extends GFFeedAddOn
 			'last_name'  => [ 
 				'name'  => 'last_name',
 				'label' => __( 'Last Name', 'gravityformsagentbox' ),
-				'type'  => 'tedynamic_field_mapt',
+				'type'  => 'dynamic_field_map',
 			],
 			'email'      => [ 
 				'name'       => 'email',
@@ -370,19 +370,16 @@ class GF_Agentbox extends GFFeedAddOn
 	 */
 	public function process_feed( $feed, $entry, $form )
 	{
-		$this->log_debug( __METHOD__ . '(): Processing feed.' );
+		self::$logger->log( __METHOD__ . '(): Processing feed.' );
 
-		// Filter variables for external modifications.
-		// error_log( print_r($feed, true), 0 );
-		// error_log( print_r($entry, true), 0 );
-		// error_log( print_r($form, true), 0 );
-		
+		// Start creating enquiry for feed.
+		$res = $this->create_enquiry( $feed, $entry, $form );
 
-		$this->create_enquiry( $feed, $entry, $form );
+		// Add notes after
+		if( $res ) {
+			// notes here
+		}
 
-
-		// $this->add_note( $entry['id'], 'is processing.', 'success' );
-		
 
 		return $entry;
 	}
@@ -394,21 +391,85 @@ class GF_Agentbox extends GFFeedAddOn
 	 * @param array $entry
 	 * @param array $form
 	 * @return array
-	 */ 
+	 */
 	public function create_enquiry( $feed, $entry, $form )
 	{
-		// Get all information from feed
-		$firstName = $this->get_field_value( $form, $entry, $feed['meta']['first_name']);
+		self::$logger->log('Start Enquiry'); // start logs
 
+		// Get all information from feed
+		$data          = [];
 		$mapped_fields = $this->get_dynamic_field_map_fields( $feed, 'mapped-fields' );
 
-		error_log($firstName);
+		// Create the array feed that will be passed to the agentbox plugin
+		foreach ( $mapped_fields as $name => $field_id ) {
 
-		self::$logger->log( 'Testing debug writing' );
+			// If no field is mapped, skip it.
+			if ( rgblank( $field_id ) ) {
+				continue;
+			}
 
-		// $agentbox = new AgentboxClass( $feed );
+			// Get Field object
+			$field = \GFFormsModel::get_field( $form, $field_id );
+			$field_value = $this->get_field_value( $form, $entry, $field_id );
+
+			// Process data
+			if( $field ) {
+				// Continue to next loop if field value is empty
+				if ( empty( $field_value ) ) continue ;
+
+				// Format value
+				if ( 'multiselect' === $field->get_input_type() ) {
+					$field_value = explode( ', ', $field_value );
+				}
+
+				if ( 'checkbox' === $field->get_input_type() && count( $field->choices ) > 1 ) {
+					$field_value = explode( ', ', $field_value );
+				}
+
+				if ( 'textarea' === $field->get_input_type() ) { 
+					$converter = new HtmlConverter( array( 'header_style' => 'atx' ) );
+					$field_value =  $converter->convert( wpautop( $field_value ) );
+				}
+			}
+			
+			$data[ $name ] = $field_value;
+		}
+
+		var_dump($data);
 
 
+		$agentbox_feed = apply_filters( 'gravityformsagentbox/agentbox-create-enquiry-feed', $data, $mapped_fields, $feed, $entry, $form );
+
+		self::$logger->log( __METHOD__ . '(): Data' . var_export( $data, true ) ); // Test log if working here
+
+		// Create Enquiry;
+		$response = "";
+
+		try {
+			$agentbox_class = new AgentboxClass( $agentbox_feed );
+			$agentbox_class->gravity_form( compact('feed', 'entry', 'form') );
+
+			// $response = $agentbox_class->enquiries->response();
+		} catch( \Exception $e) {
+			// Log error
+			self::$logger->log( __METHOD__ . '(): Unable to send enquiry' );
+			
+		}
+		
+
+		// Add action after logging
+		do_action(
+			'gravityformsagentbox/after-enquiry-process',
+			$response,
+			$data,
+			$mapped_fields,
+			$feed,
+			$entry,
+			$form
+		);
+
+
+		self::$logger->log('End Enquiry'); // end logs
 		return [];
 	}
 
@@ -417,7 +478,7 @@ class GF_Agentbox extends GFFeedAddOn
 	 *
 	 * @return void
 	 */
-	public function note_avatar() 
+	public function note_avatar()
 	{
 		return GF_Agentbox_assets . '/assets/stafflink-48x48.png';
 	}
@@ -452,10 +513,10 @@ class GF_Agentbox extends GFFeedAddOn
 	 */
 	public function add_details_meta_box( $args )
 	{
-		$form = $args['form'];
+		$form  = $args['form'];
 		$entry = $args['entry'];
 
-		$html = 'No data';
+		$html   = 'No data';
 		$action = $this->slug . '_process_feeds';
 
 		// foreach( $entry as $key => $value )

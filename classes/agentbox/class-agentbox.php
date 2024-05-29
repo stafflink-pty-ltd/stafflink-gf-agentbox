@@ -4,6 +4,7 @@ namespace GFAgentbox\Agentbox;
 
 use GFAgentbox\Agentbox\AgentBoxClient;
 use GFAgentbox\Agentbox\AgentboxContact;
+use GFAgentbox\Inc\StafflinkLogger;
 
 /**
  * AGENTBOX WRAPPER CLASS
@@ -51,6 +52,13 @@ class AgentboxClass
     protected $_logging = true;
 
     /**
+     * Create a logger for Agentbox
+     *
+     * @var [type]
+     */
+    protected $_logger;
+
+    /**
      * Agentbox payload source, defaults to website
      *
      * @var string
@@ -71,12 +79,18 @@ class AgentboxClass
     ];
 
     /**
+     * Save more gravity form information
+     *
+     * @var array
+     */
+    private $_gravityforms = [];
+
+    /**
      * Additional objects to be included in the Agentbox response
      *
      * @var array
      */
     protected $_includes = [];
-
 
     /**
      * Agentbox class constructor
@@ -91,8 +105,19 @@ class AgentboxClass
         $this->_source  = $source;
         $this->_options = array_merge( $this->_options, $options );
         $this->_state   = new AgentboxContact( $feed );
+        $this->_logger  = new StafflinkLogger;
     }
 
+    /**
+     * Save information from gravity forms as additional settings
+     *
+     * @param array $args
+     * @return void
+     */
+    public function gravity_form( $args )
+    {
+        $this->_gravityforms = array_merge( $this->_gravityforms, $args);
+    }
 
     /**
      * POST request for creating Agentbox enquiry.
@@ -101,6 +126,8 @@ class AgentboxClass
      */
     public function enquiries()
     {
+        $this->_logger->log('Creating Enquiries');
+
         $request_type = 'enquiry';
         $client       = new AgentBoxClient();
 
