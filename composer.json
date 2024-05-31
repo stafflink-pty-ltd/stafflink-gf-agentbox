@@ -1,5 +1,5 @@
 {
-    "name": "stafflink/agentbox-integration",
+    "name": "stafflink/gravityformsagentbox",
     "description": "form integration with agentbox",
     "type": "wordpress-plugin",
     "require": {
@@ -8,7 +8,7 @@
     },
     "autoload": {
         "psr-4": {
-            "GFAgentbox\\": "classes"
+            "GFAgentbox\\": "classes/"
         }
     }
 }

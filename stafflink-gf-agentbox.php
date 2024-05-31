@@ -17,7 +17,7 @@ if ( !defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-require "vendor/autoload.php";
+require_once('vendor/autoload.php');
 
 if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 
@@ -79,6 +79,7 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 
 			// Define constants.
 			self::define( 'GF_Agentbox_Bootstrap', true );
+			self::define( 'GF_Agentbox_Bootstrap_DIR', dirname( __FILE__ )  );
 			self::define( 'GF_Agentbox_Bootstrap_PATH', plugin_dir_path( __FILE__ ) );
 			self::define( 'GF_Agentbox_Bootstrap_BASENAME', plugin_basename( __FILE__ ) );
 			self::define( 'GF_Agentbox_Bootstrap_VERSION', self::$version );
@@ -114,9 +115,10 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 			if ( is_admin() ) {
 	
 			}
-
+			
 			// Define Hook
 			self::action( 'gform_loaded', self::register_addon() );
+			require "vendor/autoload.php";
 		}
 
 		/**
@@ -153,7 +155,7 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 			if ( !method_exists( 'GFForms', 'include_addon_framework' ) ) {
 				return;
 			}
-
+			
 			GFAddOn::register( 'GF_Agentbox' );
 		}
  
