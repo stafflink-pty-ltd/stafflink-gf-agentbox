@@ -3,6 +3,7 @@
 namespace GFAgentbox\Agentbox;
 
 use GFAgentbox\Agentbox\AgentBoxClient;
+use GFAgentbox\Agentbox\AgentboxClass;
 
 /**
  * AGENTBOX CONTACT CLASS
@@ -45,9 +46,37 @@ class AgentboxContact
     /**
      * The current request being done, also used for title
      *
-     * @var [type]
+     * @var string
      */
     protected $_request_type;
+
+    /**
+     * Pas the current agentbox process being used
+     *
+     * @var AgentboxClass
+     */
+    protected $agentbox;
+
+    /**
+     * Enquiry Source
+     *
+     * @var string
+     */
+    protected $_source = "website";
+
+    /**
+     * Contact information of the feed
+     *
+     * @var string
+     */
+    protected $_attached_contact;
+
+    /**
+     * Body of payload
+     *
+     * @var string
+     */
+    protected $_body;
 
     /**
      * Class Constructor
@@ -55,11 +84,12 @@ class AgentboxContact
      * @param [type] $contact
      * @param string $request_type
      */
-    public function __construct( $contact, $request_type = 'enquiry' )
+    public function __construct( $contact, $request_type = 'enquiry', AgentboxClass $agentbox = null )
     {
         $this->_initial_contact = $contact;
-        $this->_contact         = $contact;
+        $this->_contact         = $this->create_body( $request_type );
         $this->_request_type    = $request_type;
+        $this->agentbox         = $agentbox;
     }
 
     /**
@@ -67,7 +97,7 @@ class AgentboxContact
      * 
      * @param string $request_type
      *
-     * @return void
+     * @return array
      */
     public function get( $request_type = '' )
     {
@@ -83,12 +113,43 @@ class AgentboxContact
     {
         $this->_request_type = $request_type;
 
-        // replace existing contact when re-creating the body
-        $this->_contact = [];
+        //Extract Agentbox required fields
+        $firstName = $this->get_first_name() ?: "";
+        $lastName  = $this->get_last_name() ?: "";
+        $email     = $this->get_email() ?: "";
+        $mobile    = $this->get_mobile() ?: "";
 
-        return [
 
+
+        $this->_attached_contact = [ 
+            'firstName' => $firstName,
+            'lastName'  => $lastName,
+            'email'     => $email,
+            'mobile'    => $mobile,
         ];
+
+        $comment = $this->create_comment();
+
+        // Create body for enquiry
+        $body = [ 
+            $this->_request_type => [ 
+                "comment"         => $comment,
+                "source"          => $this->_source,
+                "attachedContact" => $this->_attached_contact,
+            ]
+        ];
+        
+        // Extract Agency information
+        $agent_email = $this->get_agent_email();
+        $property = $this->get_property();
+
+        if( $property !== "" ) {
+            $body['enquiry']["attachedListing"]["id"] = $property;
+            $body['enquiry']['attachedContact']['actions']['attachListingAgents'] = true;
+        }
+
+
+        return $body;
     }
 
     /**
@@ -102,12 +163,15 @@ class AgentboxContact
 
         // Comment header
         $comment = "{$title} Details:" . PHP_EOL;
-        ;
 
         // Create comment body
-        foreach ( $this->_contact as $type => $value ) {
-            $comment .= "{$type}: {$value}" . PHP_EOL;
-            ;
+        foreach ( $this->_initial_contact as $type => $value ) {
+            if( is_array( $value ) ) {
+                $val = implode( ', ', $value);
+                $comment .= "{$type}: {$val}" . PHP_EOL;
+            } else {
+                $comment .= "{$type}: {$value}" . PHP_EOL; 
+            }
         }
 
         // Write commen footer
@@ -121,28 +185,126 @@ class AgentboxContact
      *
      * @return string
      */
-    public function get_comment(): string
+    public function get_comment() : string
     {
         return $this->_comment == "" ? $this->create_comment() : $this->_comment;
     }
 
 
-    protected function attach_listing()
+    /**
+     * Check if listing exists. then get the property agentbox id
+     *
+     * @return string
+     */
+    protected function get_property()
     {
-        // Attach property id to the enquiry if property_id is available
+        // If the properties agentbox was sent by user, return with the result quickly
+        if ( rgar( $this->_initial_contact, 'Property Agentbox ID' ) !== "" ) {
+            return rgar( $this->_initial_contact, 'Property Agentbox ID' );
+        }
+        
+        //
+        if ( rgar( $this->_initial_contact, 'Property Address' ) !== "" ) {
+            $address = rgar( $this->_initial_contact, 'Source' );
+            return get_unique_id_by_listing($address);
+        }
+
+        if ( rgar( $this->_initial_contact, 'property_id' ) !== "" ) {
+            
+        }
+    }
+
+    protected function attach_agent( $contact )
+    {
+        if ( rgar( $this->_contact, 'Agent Email' ) ) {
+            var_dump( $this->_contact['Agent Email'] );
+        }
+    }
+
+    protected function attach_project()
+    {
         if ( rgar( $this->_contact, 'property_id' ) ) {
             // $body['enquiry']['attachedListing']['id'] = $this->_contact['property_id'];
             // $body['enquiry']['attachedContact']['actions']['attachListingAgents'] = true;
         }
     }
 
-    protected function attach_agent( $contact )
-    {
+    // GETTERS AND SETTER
 
+    /**
+     * Extract first name dynamically
+     *
+     * @return string|null
+     */
+    public function get_first_name()
+    {
+        return rgar( $this->_initial_contact, 'First Name' );
     }
 
-    protected function attach_project()
+    /**
+     * Extract last name dynamically
+     *
+     * @return string|null
+     */
+    public function get_last_name()
     {
+        return rgar( $this->_initial_contact, 'Last Name' );
+    }
 
+    /**
+     * Extract Email from feed
+     *
+     * @return string|null
+     */
+    public function get_email()
+    {
+        return rgar( $this->_initial_contact, 'Email' );
+    }
+
+    /**
+     * Extract Mobile from the feed
+     *
+     * @return string|null
+     */
+    public function get_mobile()
+    {
+        return rgar( $this->_initial_contact, 'Mobile' );
+    }
+
+    /**
+     * Extract Agent Email from Feed
+     *
+     * @return string|null
+     */
+    public function get_agent_email()
+    {
+        return rgar( $this->_initial_contact, 'Last Name' );
+    }
+
+    /**
+     * Set source for contact
+     *
+     * @param string $source
+     * @return void
+     */
+    public function set_source( $source )
+    {
+        $this->_source = $source;
+    }
+
+    /**
+     * String value of this object
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+         //Extract Agentbox required fields
+         $firstName = $this->get_first_name() ?: "";
+         $lastName  = $this->get_last_name() ?: "";
+         $email     = $this->get_email() ?: "";
+         $mobile    = $this->get_mobile() ?: "";
+
+         return $firstName . " " . $lastName . " - " . $email;
     }
 }

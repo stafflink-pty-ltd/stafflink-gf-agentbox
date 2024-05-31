@@ -1,13 +1,17 @@
 <?php
+namespace GFAgentbox\Agentbox;
 
 // Include the Gravity Forms Add-On Framework
-GFForms::include_feed_addon_framework();
 
-require_once GF_Agentbox_Bootstrap_PATH . '/classes/Inc/class-agentbox-logging.php';
-require_once GF_Agentbox_Bootstrap_PATH . '/classes/Agentbox/class-agentbox.php';
+
+require_once GF_Agentbox_Bootstrap_DIR . '/vendor/autoload.php';
 
 use GFAgentbox\Agentbox\AgentboxClass;
 use GFAgentbox\Inc\StafflinkLogger;
+use GFFeedAddon;
+use GFForms;
+
+GFForms::include_feed_addon_framework();
 
 class GF_Agentbox extends GFFeedAddOn
 {
@@ -314,7 +318,7 @@ class GF_Agentbox extends GFFeedAddOn
 	public function build_options()
 	{
 		$options = [ 
-			'first_name' => [ 
+			'first_name'           => [ 
 				'name'       => 'first_name',
 				'label'      => __( 'First Name', 'gravityformsagentbox' ),
 				'type'       => 'dynamic_field_map',
@@ -322,12 +326,12 @@ class GF_Agentbox extends GFFeedAddOn
 					'required' => true,
 				],
 			],
-			'last_name'  => [ 
+			'last_name'            => [ 
 				'name'  => 'last_name',
 				'label' => __( 'Last Name', 'gravityformsagentbox' ),
 				'type'  => 'dynamic_field_map',
 			],
-			'email'      => [ 
+			'email'                => [ 
 				'name'       => 'email',
 				'label'      => __( 'Email', 'gravityformsagentbox' ),
 				'type'       => 'dynamic_field_map',
@@ -335,13 +339,28 @@ class GF_Agentbox extends GFFeedAddOn
 					'required' => true,
 				],
 			],
-			'mobile'     => [ 
+			'mobile'               => [ 
 				'name'       => 'mobile',
 				'label'      => __( 'Mobile', 'gravityformsagentbox' ),
 				'type'       => 'dynamic_field_map',
 				'validation' => [ 
 					'required' => true,
 				],
+			],
+			'agent_email'          => [ 
+				'name'  => 'agent_email',
+				'label' => __( 'Agent Email', 'gravityformsagentbox' ),
+				'type'  => 'dynamic_field_map',
+			],
+			'property_agentbox_id' => [ 
+				'name'  => 'property_agentbox_id',
+				'label' => __( 'Property Agentbox ID', 'gravityformsagentbox' ),
+				'type'  => 'dynamic_field_map',
+			],
+			'property_address'     => [ 
+				'name'  => 'property_address',
+				'label' => __( 'Property Address', 'gravityformsagentbox' ),
+				'type'  => 'dynamic_field_map',
 			],
 		];
 
@@ -376,7 +395,7 @@ class GF_Agentbox extends GFFeedAddOn
 		$res = $this->create_enquiry( $feed, $entry, $form );
 
 		// Add notes after
-		if( $res ) {
+		if ( $res ) {
 			// notes here
 		}
 
@@ -394,7 +413,7 @@ class GF_Agentbox extends GFFeedAddOn
 	 */
 	public function create_enquiry( $feed, $entry, $form )
 	{
-		self::$logger->log('Start Enquiry'); // start logs
+		self::$logger->log( 'Start Enquiry' ); // start logs
 
 		// Get all information from feed
 		$data          = [];
@@ -409,13 +428,13 @@ class GF_Agentbox extends GFFeedAddOn
 			}
 
 			// Get Field object
-			$field = \GFFormsModel::get_field( $form, $field_id );
+			$field       = \GFFormsModel::get_field( $form, $field_id );
 			$field_value = $this->get_field_value( $form, $entry, $field_id );
 
 			// Process data
-			if( $field ) {
+			if ( $field ) {
 				// Continue to next loop if field value is empty
-				if ( empty( $field_value ) ) continue ;
+				if ( empty( $field_value ) ) continue;
 
 				// Format value
 				if ( 'multiselect' === $field->get_input_type() ) {
@@ -426,36 +445,32 @@ class GF_Agentbox extends GFFeedAddOn
 					$field_value = explode( ', ', $field_value );
 				}
 
-				if ( 'textarea' === $field->get_input_type() ) { 
-					$converter = new HtmlConverter( array( 'header_style' => 'atx' ) );
-					$field_value =  $converter->convert( wpautop( $field_value ) );
+				if ( 'textarea' === $field->get_input_type() ) {
+					$field_value = wpautop( $field_value );
 				}
 			}
-			
+
 			$data[ $name ] = $field_value;
 		}
 
-		var_dump($data);
-
-
 		$agentbox_feed = apply_filters( 'gravityformsagentbox/agentbox-create-enquiry-feed', $data, $mapped_fields, $feed, $entry, $form );
 
-		self::$logger->log( __METHOD__ . '(): Data' . var_export( $data, true ) ); // Test log if working here
+		self::$logger->log( __METHOD__ . '(): Data ' . var_export( $data, true ) ); // Test log if working here
 
 		// Create Enquiry;
 		$response = "";
 
 		try {
 			$agentbox_class = new AgentboxClass( $agentbox_feed );
-			$agentbox_class->gravity_form( compact('feed', 'entry', 'form') );
+			$agentbox_class->gravity_form( compact( 'feed', 'entry', 'form' ) );
 
 			// $response = $agentbox_class->enquiries->response();
-		} catch( \Exception $e) {
+		} catch ( \Exception $e ) {
 			// Log error
 			self::$logger->log( __METHOD__ . '(): Unable to send enquiry' );
-			
+
 		}
-		
+
 
 		// Add action after logging
 		do_action(
@@ -469,7 +484,7 @@ class GF_Agentbox extends GFFeedAddOn
 		);
 
 
-		self::$logger->log('End Enquiry'); // end logs
+		self::$logger->log( 'End Enquiry' ); // end logs
 		return [];
 	}
 

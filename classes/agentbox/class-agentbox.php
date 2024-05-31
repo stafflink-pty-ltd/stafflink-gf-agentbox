@@ -1,5 +1,4 @@
 <?php
-
 namespace GFAgentbox\Agentbox;
 
 use GFAgentbox\Agentbox\AgentBoxClient;
@@ -126,26 +125,36 @@ class AgentboxClass
      */
     public function enquiries()
     {
-        $this->_logger->log('Creating Enquiries');
-
         $request_type = 'enquiry';
         $client       = new AgentBoxClient();
+        
 
         // Default behavior: 
         // Check if contact already has a primary owner.
         // Check if there is an agent attached to the feed
         // Check if there is a default agent saved in the settings
-        if ( $this->_options['save_primary_owner_default'] ) {
-            $contact = $this->contacts( [ '' ] );
-            $this->_state->attach_agent( $contact );
-        }
+        // if ( $this->_options['save_primary_owner_default'] ) {
+        //     $contact = $this->contacts( [ '' ] );
+        //     $this->_state->attach_agent( $contact );
+        // }
 
 
         // Create post request for enquiries
         $body = $this->_state->get( $request_type );
-        $req  = $client->post( 'enquiry', $body );
 
-        $this->save_transactions( 'Enquiry', 'Create post request for enquiries ', $req );
+        try {
+            $req = $client->post( 'enquiry', $body );
+
+            var_dump($req);
+            $this->_logger->log( 'Creating Enquiries for: ' . $this->_state );
+        } catch( \Exception $e) {
+
+        }
+
+        // var_dump($body);
+        // $req  = $client->post( 'enquiry', $body );
+
+        // $this->save_transactions( 'Enquiry', 'Create post request for enquiries ', $req );
     }
 
     /**
@@ -312,7 +321,7 @@ class AgentboxClass
      */
     protected function save_transactions( $key, $additional_information, $http_response )
     {
-        $this->_steps[] = compact( 'key', 'additional_information', 'http_response' );
+        // $this->_steps[] = compact( 'key', 'additional_information', 'http_response' );
     }
 
 
@@ -328,6 +337,7 @@ class AgentboxClass
     public function set_source( $source )
     {
         $this->_source = $source;
+        $this->_state->set_source( $source );
     }
 
     /**
@@ -335,9 +345,19 @@ class AgentboxClass
      *
      * @return string
      */
-    public function get_source(): string
+    public function get_source() : string
     {
         return $this->_source;
+    }
+
+    /**
+     * Get the agentbox contact state
+     *
+     * @return array
+     */
+    public function get_agentbox_contact()
+    {
+        return $this->_state->get();
     }
 
 }
