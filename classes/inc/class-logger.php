@@ -61,40 +61,45 @@ class StafflinkLogger
      * Create a log entry to the log file
      *
      * @param string $message
+     * @param string $level
      * @return void
      */
-    public function log( $message )
+    public function log( $message, $level = "INFO" )
     {
-        $message = $this->create_message( $message );
+        if ( !$this->log_level[ $level ] ) {
+            return;
+        }
 
+        $message = $this->create_message( $message );
         file_put_contents( $this->log_file, $message, FILE_APPEND );
     }
 
-    public function log_info()
+    public function log_info( $message )
     {
-
+        $this->log( $message, 'INFO' );
     }
 
-    public function log_debug()
+    public function log_debug( $message )
     {
-
+        $this->log( $message, 'DEBUG' );
     }
 
-    public function log_error()
+    public function log_error( $message )
     {
-
+        $this->log( $message, 'ERROR' );
     }
 
     /**
      * Formats the message for the log file
      *
      * @param string $message
+     * @param string $level
      * @return string
      */
-    public function create_message( $message ): string
+    public function create_message( $message, $level = "INFO" ): string
     {
         $timestamp = date( 'Y-m-d H:i:s' );
-        $message   = "[{$timestamp}] {$message}" . PHP_EOL;
+        $message   = "[{$timestamp}]~log[{$this->log_level[$level]}]: {$message}" . PHP_EOL;
 
         return $message;
     }
