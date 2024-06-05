@@ -50,7 +50,7 @@ abstract class Base_Connection
 
 
     /**
-     * For saving logs000
+     * For saving logs
      *
      * @var boolean $do_logs If set to TRUE, create logs per http request and responses
      */

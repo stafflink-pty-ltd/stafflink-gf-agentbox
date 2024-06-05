@@ -46,23 +46,32 @@ class AgentBoxClient extends Base_Connection implements ConnectionInterface
      * Create the endpoint to be used in the request
      *
      * @param string $resource resource used in agentbo endpoint
+     * @param string $method method which the endpoint is going to be used
      * @return string
      */
-    protected function create_endpoint( $resource )
+    protected function create_endpoint( $resource, $method = "GET" )
     {
         // Get endpoint params and filters
         $params  = $this->create_http_query_params();
         $filters = $this->create_http_query_filters();
+        $include = $this->create_http_query_includes();
 
         // Endpoint base url
         $endpoint = "{$this->domain}{$resource}?";
 
-        if ( $filters !== "" ) {
-            $endpoint .= "{$filters}&";
-        }
+        // Add filters and params
+        if( "GET" === $method ) {
+            if ( $filters !== "" ) {
+                $endpoint .= "{$filters}&";
+            }
 
-        if ( $params ) {
-            $endpoint .= "{$params}&";
+            if ( $include !== "" ) {
+                $endpoint .= "{$include}&";
+            }
+    
+            if ( $params ) {
+                $endpoint .= "{$params}&";
+            }
         }
 
         $endpoint .= "version={$this->version}";
@@ -84,14 +93,15 @@ class AgentBoxClient extends Base_Connection implements ConnectionInterface
     {
         // Set the filters to be used then create the endpoint for the GET request
         $this->config->set( [ 'filters' => $filters ] );
+        $this->config->set( [ 'include' => $include ] );
         $endpoint = $this->create_endpoint( $resource );
         $this->request_method = 'GET';
 
         // Do a GET request
         $this->log( "Processing GET request to {$resource} resource" );
-        $response = wp_remote_get( $endpoint, $this->config->headers );
+        // $response = wp_remote_get( $endpoint, $this->config->headers );
 
-        return $this->response( $response );
+        // return $this->response( $response );
     }
 
     /**
@@ -103,11 +113,11 @@ class AgentBoxClient extends Base_Connection implements ConnectionInterface
      */
     public function post( $resource, $request_body ) : string|array 
     {
-        $endpoint = $this->create_endpoint( $resource );
+        $endpoint = $this->create_endpoint( $resource, 'POST' );
         $this->request_method = "POST";
 
         // Do a POST request
-        $this->log( "Processing POST request to {$resource} resource");
+        $this->log( "Processing POST request to [{$resource}] resource");
 
         // Set the body of the request;
         $this->config->setBody( $request_body );
@@ -115,7 +125,7 @@ class AgentBoxClient extends Base_Connection implements ConnectionInterface
 
         $response = wp_remote_post( $endpoint, $this->config->get_configs() );
 
-        return $response;
+        return $this->response( $response );
     }
 
     /**
@@ -154,22 +164,48 @@ class AgentBoxClient extends Base_Connection implements ConnectionInterface
     }
 
     /**
-     *  Process the response of the requests
+     *  Process and filters the request and returns a simplified array of the response
      *
      * @param array $response
      * @return array|bool
      */
     protected function response( $response ): array|bool
     {
+        // return data and lookup table for the required response
+        $data = [ 
+            'http'     => [],
+            'message'   => '',
+            'response' => [],
+        ];
+
+        // This error is when client successfully sent out a request but returns an
+        // unprocessable data
+        if( is_array($response) && isset($response['response']) && 422 == $response['response']['code'] ) {
+            $body    = json_decode( $response['body'] );
+            $message = "({$response['response']['code']}) {$body->response->errors[0]->detail} ";
+
+            $data['http']     = [ 
+                'code'    => $response['response']['code'],
+                'message' => $response['response']['message'],
+                'debug'   => $body->response->errors,
+            ];
+            $data['message']  = $message;
+            $data['response'] = $response;
+
+            return $data;
+        }
+
         // log errors then return immedia
-        if ( is_wp_error( $response ) || 201 !== $response['response']['code'] ) {
-            if ( defined( 'WP_DEBUG' ) && true === WP_DEBUG || $this->save_logs ) {
+        if ( is_wp_error( $response ) || ! is_array( $response ) ) {
+            if ( defined( 'WP_DEBUG' ) && true === WP_DEBUG ) {
                 $this->log( "Failed to do a {$this->request_method} request" );
             }
 
             return false;
         }
 
+        
+        // return response if success
         return $response;
     }
 
@@ -196,6 +232,24 @@ class AgentBoxClient extends Base_Connection implements ConnectionInterface
 
         return $filters;
     }
+
+    /**
+     * Create includes for Agentbox's HTTP Request
+     *
+     * @return string
+     */
+    protected function create_http_query_includes(): string
+    {
+        if( !$this->config->has( 'include' ) ) {
+            return "";
+        }
+
+        $include = "include=". implode( ",", $this->config->include['include'] );
+
+        return $include;
+    }
+
+
 
     /**
      * Creates a trail of logs

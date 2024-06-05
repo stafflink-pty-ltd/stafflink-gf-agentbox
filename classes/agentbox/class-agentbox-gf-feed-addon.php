@@ -1,15 +1,13 @@
 <?php
-namespace GFAgentbox\Agentbox;
-
 // Include the Gravity Forms Add-On Framework
-
 
 require_once GF_Agentbox_Bootstrap_DIR . '/vendor/autoload.php';
 
+require_once GF_Agentbox_Bootstrap_DIR . '/classes/Inc/class-logger.php';
+require_once GF_Agentbox_Bootstrap_DIR . '/classes/Agentbox/class-agentbox.php';
+
 use GFAgentbox\Agentbox\AgentboxClass;
 use GFAgentbox\Inc\StafflinkLogger;
-use GFFeedAddon;
-use GFForms;
 
 GFForms::include_feed_addon_framework();
 
@@ -159,7 +157,7 @@ class GF_Agentbox extends GFFeedAddOn
 	/**
 	 * Addon settings for agentbox
 	 *
-	 * @return void
+	 * @return array
 	 */
 	public function agentbox_addon_settings_field()
 	{
@@ -359,7 +357,7 @@ class GF_Agentbox extends GFFeedAddOn
 			],
 			'property_address'     => [ 
 				'name'  => 'property_address',
-				'label' => __( 'Property Address', 'gravityformsagentbox' ),
+				'label' => __( 'Property Agentbox ID', 'gravityformsagentbox' ),
 				'type'  => 'dynamic_field_map',
 			],
 		];
@@ -461,10 +459,10 @@ class GF_Agentbox extends GFFeedAddOn
 		$response = "";
 
 		try {
-			$agentbox_class = new AgentboxClass( $agentbox_feed );
+			$agentbox_class = new AgentboxClass( $agentbox_feed, $this->get_plugin_settings() );
 			$agentbox_class->gravity_form( compact( 'feed', 'entry', 'form' ) );
 
-			// $response = $agentbox_class->enquiries->response();
+			// $response = $agentbox_class->enquiries();
 		} catch ( \Exception $e ) {
 			// Log error
 			self::$logger->log( __METHOD__ . '(): Unable to send enquiry' );

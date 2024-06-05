@@ -98,7 +98,7 @@ class AgentboxClass
      * @param string $source Default value: 'website'
      * @param array $options
      */
-    public function __construct( $feed = [], $source = "website", $options = [] )
+    public function __construct( $feed = [], $options = [], $source = "website"  )
     {
         $this->_feed    = $feed;
         $this->_source  = $source;
@@ -127,8 +127,55 @@ class AgentboxClass
     {
         $request_type = 'enquiry';
         $client       = new AgentBoxClient();
+
+        // Create post request for enquiries
+        $feed = $this->_state->get( $request_type );
+
+        try {
+            // Send Enquiry
+            $this->_logger->log( 'Creating Enquiries for: ' . $this->_state );
+            $res = $client->post( 'enquiries', $feed );
+            
+            // Log results
+            if( isset( $res['http'] ) ) {
+                $this->_logger->log_error( "(Enquiry Submission) {$res['message']} " );
+            } else {
+                $this->_logger->log_debug( "(Enquiry Submission) {$res}['response']['code'] {$res['response']['message']}" );
+            }
+            
+            $contact = json_decode( $res['body'] );
+
+            // Do Agent Process next
+            if( $this->_state->get_agent_email() !== "" ) {
+                $agent_res = $this->attach_agent( $this->_state->get_agent_email() );
+            }
+            
+
+            // Continue with the enquiry process
+
+            // $this->_logger->log( var_export($contact->response->errors[0], true));
+
+            
+
+        } catch( \Exception $e) {
+            $this->_logger->log_error( $e->getMessage() );
+        }
         
 
+        // var_dump($body);
+        // $req  = $client->post( 'enquiry', $body );
+
+        // $this->save_transactions( 'Enquiry', 'Create post request for enquiries ', $req );
+    }
+
+    /**
+     * Attach the agent to the enquiry
+     *
+     * @param string $agent_email
+     * @return void
+     */
+    public function attach_agent( $agent_email )
+    {
         // Default behavior: 
         // Check if contact already has a primary owner.
         // Check if there is an agent attached to the feed
@@ -138,24 +185,121 @@ class AgentboxClass
         //     $this->_state->attach_agent( $contact );
         // }
 
+        // Check if user is registered, quickly return if not
+        $is_registered = $this->is_user_registered( $this->_state->get_email() );
+        if( ! $is_registered ) {
+            return;
+        }
+    
+        // Get Agent ID in agentbox
+        $agent_res = $this->get_staff_by_email( $agent_email );
+        $agent_id = json_decode($agent_res['body'], true);
 
-        // Create post request for enquiries
-        $body = $this->_state->get( $request_type );
+        // use OC's process in saving the primary owner
+        if( $this->_options['save_primary_owner_default'] ) {
+            $this->process_oc_primary_owner( $agent_id,  );
+        }
+    }
 
-        try {
-            $req = $client->post( 'enquiry', $body );
+    /**
+     * Do the OC process in adding primary owner for contacts
+     * 
+     * @param array $contact
+     * @return void
+     */
+    public function process_oc_primary_owner( $contact )
+    {
+        // Check first if contact has primary owner
+        $has_primary_owner = $this->contact_has_primary_owner( $contact );
+        if( $has_primary_owner ) {
+            $this->_logger->log_info( 'Primary owner found, saving listing agent' );
 
-            var_dump($req);
-            $this->_logger->log( 'Creating Enquiries for: ' . $this->_state );
-        } catch( \Exception $e) {
-
+            return;
         }
 
-        // var_dump($body);
-        // $req  = $client->post( 'enquiry', $body );
-
-        // $this->save_transactions( 'Enquiry', 'Create post request for enquiries ', $req );
+        // Continue here if no primary owner was found
     }
+
+
+    public function have_default_primary_owner( $contact )
+    {
+
+    }
+
+    public function replace_primary_owner( $contact )
+    {
+
+    }
+
+    /**
+     * Check if the contact already has a Primary owner or not
+     *
+     * @param array|string $contact
+     * @return boolean
+     */
+    public function contact_has_primary_owner( $contact )
+    {
+        // if contact passed is a result of previous agentbox request
+        if( isset( $contact['body'] ) ) {
+            $contact = json_decode($contact['body']);
+    
+            // Run through related staff to check if the Primary Owner exists
+            if( !empty($contact->response->contacts) ) {
+                $relatedStaff = $contact->response->contacts[0]->relatedStaffMembers;
+                foreach( $relatedStaff as $staff ) {
+                    if( $staff->role == "Primary Owner") {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        // check if passed argument is an email
+        if( is_email( $contact ) ) {
+            $user = $this->is_user_registered( $this->_state->get_email() );
+
+            $this->contact_has_primary_owner( $user );
+        }
+        
+    
+        return false;
+    }
+
+    /**
+     * Check if contact already exists in Agentbox
+     *
+     * @param string $email
+     * @return boolean
+     */
+    public function is_contact_exists( $email )
+    {
+        $user = $this->is_user_registered( $email );
+        
+        return isset($user['body']) ?: false;
+    }
+
+    /**
+     * Check if contact is registered to OC First
+     *
+     * @param string $user_email
+     * @return boolean|array
+     */
+    public function is_user_registered( $user_email )
+    {
+        $client  = new AgentBoxClient();
+        $contact = $client->get( 'contacts', ['email' => $user_email], ['relatedStaffMembers'] );
+        $response  = json_decode($contact['body']);
+
+        if( $response->response->items > 0 ) {
+            return $contact;    
+        }
+
+        return false;
+        
+    }
+
+    
+
 
     /**
      * Create contact endpoint request to Agentbox
@@ -165,7 +309,6 @@ class AgentboxClass
      * @param array|string $info variable used as filter or as contact id depending on what was passed
      * @param string $request Http Request type. Default: 'get'
      * @param array $include (optional)  additional information added to response
-     * 
      * @return array
      */
     public function contacts( $info, $request = 'get', $include = [] )
@@ -196,7 +339,6 @@ class AgentboxClass
      *
      * @param array|string $info variable used as filter or as contact id depending on what was passed
      * @param array $include (optional) additional information added to response
-     * 
      * @return array
      */
     public function staff( $info, $include = [] )
@@ -227,7 +369,6 @@ class AgentboxClass
      * 
      * @param string $filter (optional) Fitler results by contact classes
      * @param array $include (optional) Output addtional object in the response
-     *
      * @return void
      */
     public function contact_classes( $filter = "", $include = [] )
@@ -245,7 +386,6 @@ class AgentboxClass
      *
      * @param string $project_id (optional) Unique project id
      * @param array $includes (optional) Output additional objects in the response.
-     * 
      * @return array
      */
     public function projects( $project_id = null, $includes = [] )

@@ -162,15 +162,15 @@ class AgentboxContact
         $title = ucfirst( $this->_request_type );
 
         // Comment header
-        $comment = "{$title} Details:" . PHP_EOL;
+        $comment = "{$title} Details: <br />" . PHP_EOL;
 
         // Create comment body
         foreach ( $this->_initial_contact as $type => $value ) {
             if( is_array( $value ) ) {
                 $val = implode( ', ', $value);
-                $comment .= "{$type}: {$val}" . PHP_EOL;
+                $comment .= "{$type}: {$val} <br />" . PHP_EOL;
             } else {
-                $comment .= "{$type}: {$value}" . PHP_EOL; 
+                $comment .= "{$type}: {$value} <br />" . PHP_EOL; 
             }
         }
 
