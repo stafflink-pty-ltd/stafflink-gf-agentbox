@@ -74,19 +74,48 @@ class StafflinkLogger
         file_put_contents( $this->log_file, $message, FILE_APPEND );
     }
 
+    /**
+     * Create an info log
+     *
+     * @param string $message
+     * @return void
+     */
     public function log_info( $message )
     {
         $this->log( $message, 'INFO' );
     }
 
+    /**
+     * Create an debug log
+     *
+     * @param string $message
+     * @return void
+     */
     public function log_debug( $message )
     {
         $this->log( $message, 'DEBUG' );
     }
 
+    /**
+     * Create an error log
+     *
+     * @param string $message
+     * @return void
+     */
     public function log_error( $message )
     {
         $this->log( $message, 'ERROR' );
+    }
+
+    /**
+     * Logs a printed array
+     *
+     * @param array $array
+     * @return void
+     */
+    public function log_array( $array )
+    {
+
     }
 
     /**
