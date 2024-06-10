@@ -108,14 +108,16 @@ class StafflinkLogger
     }
 
     /**
-     * Logs a printed array
+     * Logs a printed array for debugging, only works if WP_DEBUG is enabled
      *
      * @param array $array
      * @return void
      */
     public function log_array( $array )
     {
-
+        if( defined(WP_DEBUG) && WP_DEBUG ) {
+            $this->log( var_export($array, true), 'DEBUG' );
+        }
     }
 
     /**
