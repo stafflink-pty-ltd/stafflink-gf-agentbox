@@ -140,9 +140,9 @@ class AgentboxContact
         ];
         
         // Extract Agency information
-        $agent_email = $this->get_agent_email();
         $property = $this->get_property();
 
+        // if property exists, save the property ID then append the listing agent to the contact
         if( $property !== "" ) {
             $body['enquiry']["attachedListing"]["id"] = $property;
             $body['enquiry']['attachedContact']['actions']['attachListingAgents'] = true;
@@ -278,7 +278,7 @@ class AgentboxContact
      */
     public function get_agent_email()
     {
-        return rgar( $this->_initial_contact, 'Last Name' );
+        return rgar( $this->_initial_contact, 'Agent Email' );
     }
 
     /**
