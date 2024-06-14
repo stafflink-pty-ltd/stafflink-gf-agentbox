@@ -38,6 +38,17 @@ class EndpointConfiguration
     }
 
     /**
+     * Method used for the request
+     *
+     * @param string $method
+     * @return void
+     */
+    public function set_method( $method )
+    {
+        $this->config['method'] = $method;
+    }
+
+    /**
      * Check if the key is available inside th config
      *
      * @param [type] $key

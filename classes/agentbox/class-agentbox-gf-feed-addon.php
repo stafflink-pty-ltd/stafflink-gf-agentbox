@@ -462,6 +462,10 @@ class GF_Agentbox extends GFFeedAddOn
 			$agentbox_class = new AgentboxClass( $agentbox_feed, $this->get_plugin_settings() );
 			$agentbox_class->gravity_form( compact( 'feed', 'entry', 'form' ) );
 
+			$ab = $agentbox_class->enquiries();
+
+			$this->add_note( '', '');
+
 			// $response = $agentbox_class->enquiries();
 		} catch ( \Exception $e ) {
 			// Log error

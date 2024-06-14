@@ -109,7 +109,9 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 			// Include utility functions. 
 	
 			require_once dirname( __FILE__ ) . '/classes/Agentbox/class-agentbox-gf-feed-addon.php';
-
+			require_once WP_CONTENT_DIR . "/plugins/stafflink-gf-agentbox/agentbox-bootstrap.php";
+			$boot = new Agentbox_bootstrap();
+			$boot->start();
 
 			// Include admin.
 			if ( is_admin() ) {

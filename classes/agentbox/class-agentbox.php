@@ -146,7 +146,7 @@ class AgentboxClass
             // Log results
             if( isset( $enquiry_res['http'] ) ) {
                 $this->_logger->log_error( "(Enquiry Submission) {$enquiry_res['message']} " );
-            } else {
+            } else { 
                 $this->_logger->log_debug( "(Enquiry Submission) {$enquiry_res['response']['code']} {$enquiry_res['response']['message']}" );
             }
             
@@ -160,19 +160,11 @@ class AgentboxClass
 
             // Continue with the enquiry process
 
-            // $this->_logger->log( var_export($contact->response->errors[0], true));
-
             
 
         } catch( \Exception $e) {
             $this->_logger->log_error( $e->getMessage() );
         }
-        
-
-        // var_dump($body);
-        // $req  = $client->post( 'enquiry', $body );
-
-        // $this->save_transactions( 'Enquiry', 'Create post request for enquiries ', $req );
     }
 
     /**
@@ -209,7 +201,6 @@ class AgentboxClass
                 $enquiry = $user_contact->response;
             }
         }
-        
 
         // use OC's process in saving the primary owner
         if( $this->_options['save_primary_owner_default'] ) {
@@ -349,14 +340,14 @@ class AgentboxClass
 		];
 
         $update = $client->put( "contacts/{$contact_id}", $contact_body);
+
+
         // Log results
         if( isset( $update['http'] ) ) {
             $this->_logger->log_error( "(Enquiry Submission) {$update['message']} " );
         } else {
             $this->_logger->log_debug( "(Enquiry Submission) {$update['response']['code']} {$update['response']['message']}" );
         }
-
-        exit;
     }
 
     /**
