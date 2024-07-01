@@ -1,4 +1,5 @@
 === Agentbox Integration ===
+
 Contributors: amielSL, mattneal-stafflink
 Tags: comments, spam
 License: GPLv2 or later
@@ -9,24 +10,22 @@ Gravtiy forms and Agentbox integration
 # Description
 An addon feed plugin for Gravity Forms that allows seamless integration with Agentbox Enquiries. This addon enables autmatic form feed submissions from your website directly into you Agentbox account.
 
-# Todo
--[ ] Testing integration with EPL
-
 # Features
-### Custom Field Mapping: 
+- ### Custom Field Mapping: 
 Map Gravity form fields to Agentbox fields to ensure accurate data transfer.
 
-### Condiitional Logic: 
+- ### Conditional Logic: 
 Set conditions to control when form data should be sent to Agentbox.
 
-### Entry Notes and Metabox
+- ### Entry Notes and Metabox:
 Automtatically add notes and feed status directly from the Gravity Forms entry detail page.
 
-### EasyPropertyListing integration
+- ### EasyPropertyListing integration:
 Seamlessly integrate with EPL Listing pages
 
-### 
-### Error Logging
+- ### Hooks and Filters:
+Available hooks and filters to extend the current plugin's functionality
+- ### Error Logging:
 Track any issues that occur during the data transfer process.
 
 # Requirements
