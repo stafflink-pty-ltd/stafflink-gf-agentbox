@@ -4,6 +4,7 @@ namespace GFAgentbox\Agentbox;
 
 use GFAgentbox\Agentbox\AgentBoxClient;
 use GFAgentbox\Agentbox\AgentboxClass;
+use GFAgentbox\Inc\AgentboxEPLIntegration;
 
 /**
  * AGENTBOX CONTACT CLASS
@@ -51,7 +52,7 @@ class AgentboxContact
     protected $_request_type;
 
     /**
-     * Pas the current agentbox process being used
+     * Pass the current agentbox process being used
      *
      * @var AgentboxClass
      */
@@ -198,20 +199,56 @@ class AgentboxContact
      */
     protected function get_property()
     {
+        $epl = new AgentboxEPLIntegration();
+
+        if( $epl->is_active() ) {
+            // EPL integrated step
+            if( rgar( $this->_initial_contact, 'Source' ) !== "" ) {
+                return $epl->get_listing_by_url( rgar( $this->_initial_contact, 'Source' ) );
+            }
+        }
+
         // If the properties agentbox was sent by user, return with the result quickly
         if ( rgar( $this->_initial_contact, 'Property Agentbox ID' ) !== "" ) {
             return rgar( $this->_initial_contact, 'Property Agentbox ID' );
         }
         
-        //
-        if ( rgar( $this->_initial_contact, 'Property Address' ) !== "" ) {
-            $address = rgar( $this->_initial_contact, 'Source' );
-            return get_unique_id_by_listing($address);
+        // for property address
+        // if ( rgar( $this->_initial_contact, 'Property Address' ) !== "" ) {
+        //     $address = rgar( $this->_initial_contact, 'Source' );
+        //     // return get_unique_id_by_listing($address);
+        // }
+
+        // If they gave property post id
+        if ( rgar( $this->_initial_contact, 'Property Post ID' ) !== "" ) {
+            $id = rgar( $this->_initial_contact, 'Property Post ID' );
+            $unique_id = get_post_meta( $id, 'property_unique_id', true );    
+
+            return $unique_id;
+        }
+    }
+
+    /**
+     * check if property key exists
+     *
+     * @return boolean
+     */
+    protected function has_property_key()
+    {
+        $keys = [
+            'Property Agentbox ID', 'Property Address', 'Property Post ID'
+        ];
+
+        $has_property_key = false;
+
+        foreach( $keys as $key ) {
+            if( rgar( $this->_initial_contact, 'Property Post ID' ) !== "" ) {
+                $has_property_key = true;
+                continue;   
+            }
         }
 
-        if ( rgar( $this->_initial_contact, 'property_id' ) !== "" ) {
-            
-        }
+        return $has_property_key;
     }
 
     protected function attach_agent( $contact )

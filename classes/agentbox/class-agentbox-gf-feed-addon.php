@@ -357,7 +357,7 @@ class GF_Agentbox extends GFFeedAddOn
 			],
 			'property_address'     => [ 
 				'name'  => 'property_address',
-				'label' => __( 'Property Agentbox ID', 'gravityformsagentbox' ),
+				'label' => __( 'Property Address', 'gravityformsagentbox' ),
 				'type'  => 'dynamic_field_map',
 			],
 		];
@@ -462,9 +462,13 @@ class GF_Agentbox extends GFFeedAddOn
 			$agentbox_class = new AgentboxClass( $agentbox_feed, $this->get_plugin_settings() );
 			$agentbox_class->gravity_form( compact( 'feed', 'entry', 'form' ) );
 
-			$ab = $agentbox_class->enquiries();
+			error_log( var_export($feed) );
 
-			$this->add_note( '', '');
+			// $ab = $agentbox_class->enquiries();
+
+			
+
+			$this->add_note( $feed['form_id'], 'Agentbox Entry created' );
 
 			// $response = $agentbox_class->enquiries();
 		} catch ( \Exception $e ) {

@@ -37,23 +37,9 @@ class AgentboxClass
     protected $_transactions = [];
 
     /**
-     * Log errors for future purposes
-     *
-     * @var array
-     */
-    protected $_errors = [];
-
-    /**
-     * Create logs of what the Agentbox stuff is doing
-     *
-     * @var boolean
-     */
-    protected $_logging = true;
-
-    /**
      * Create a logger for Agentbox
      *
-     * @var [type]
+     * @var StafflinkLogger
      */
     protected $_logger;
 
@@ -159,7 +145,7 @@ class AgentboxClass
             
 
             // Continue with the enquiry process
-
+            
             
 
         } catch( \Exception $e) {
@@ -224,22 +210,23 @@ class AgentboxClass
         $has_primary_owner  = $this->contact_has_primary_owner( $_registered );
         $have_default_owner = $this->have_default_primary_owner( $_registered );
 
-        // Check first if the primary owner is the default,
-        // If a new agent is available in the feed, use that as the primary owner
+        // REPLACE primary owner if default is found
         if( $have_default_owner && $has_primary_owner ) {
             $this->_logger->log_info( "Default Primary owner found: {$this->_options['global_default_primary_owner']}" );
             
             // check if agent email exists
             $this->update_primary_owner( $agentbox_enquiry_response );
+
+            return [];
         }
 
-        // If primary owner already exists and is not the default, just return
+        // RETURN if primary owner detected
         if( !$have_default_owner && $has_primary_owner ) {
             $this->_logger->log_info( 'Primary owner found' );
             return [];
         }
 
-        // Continue here if no primary owner was found
+        // Update ownership if no primary owner found
         $this->update_primary_owner( $agentbox_enquiry_response );
     }
 
@@ -290,62 +277,90 @@ class AgentboxClass
     /**
      * Update the primary owner
      *
-     * @param string
+     * @param string $agentbox_contact 
      * @param string $agent_email Default: null. Saves the agent email as primary owner
      * @return void
      */
     public function update_primary_owner( $agentbox_contact, $agent_email = null )
     {
-        $client      = new AgentBoxClient();
         $agent_email = $agent_email ?? $this->_state->get_agent_email();
-        $agent_res   = $this->get_staff_by_email( $agent_email );
+        $agent_res = $this->get_staff_by_email( $agent_email );
 
-        $this->_logger->log_info( 'Replacing primary owner with: ' . $agent_email );
+        $this->_logger->log_info( 'Adding primary owner: ' . $agent_email );
+        $contact_id = "";
 
-        // if contact passed is a result of previous agentbox request
-        if( is_array($agentbox_contact) && isset( $agentbox_contact['body'] ) ) {
-            $contact = json_decode($agentbox_contact['body']);
-    
-            // Run through related staff to check if the Primary Owner exists
-            if( !empty($agentbox_contact->response->contacts) ) {
-                
-            }
-        }
 
-        if( $agentbox_contact instanceof \stdClass ) {
-            if( property_exists($agentbox_contact, "enquiry") ) {
+        // READ: Main point of this code is to get the ID of the contact/enquirer in agentbox
+        //       then pass it to the PUT request for the primary owner processing
+
+
+        // ACCEPTS: Agentbox stdClass        
+        // Main code block to process the contact_id. All succeeding code block loops here.
+        if ( $agentbox_contact instanceof \stdClass ) {
+            if ( property_exists( $agentbox_contact, "enquiry" ) ) {
                 $contact_id = $agentbox_contact->enquiry->contact->id;
             }
         }
 
+        // ACCEPTS: Agentbox raw response
+        // if contact passed is a result of previous agentbox enqjuiry request.
+        if ( is_array( $agentbox_contact ) && isset( $agentbox_contact['body'] ) ) {
+            $contact = json_decode( $agentbox_contact['body'] );
+
+            // Run through related staff to check if the Primary Owner exists
+            if ( !empty( $contact->response ) ) {
+                $this->update_primary_owner( $contact->response );
+            }
+        }
+
+        // ACCEPTS: email
         // check if passed argument is an email
-        if( !( $agentbox_contact instanceof \stdClass ) ) {
-            if(  is_email( $agentbox_contact ) ) {
-                
+        if ( !( $agentbox_contact instanceof \stdClass ) ) {
+            if ( is_email( $agentbox_contact ) ) {
+                $contact      = $this->contacts( [ 'email' => $agentbox_contact ] );
+                $contact_body = json_decode( $contact['body'] );
+                $contact_id = $contact_body->response->contacts[0]->id;
             }
         }
 
         // Get agent ID
         $agent_id = $agent_res->id;
 
-        $contact_body = [
-			'contact' => [
-				"attachedRelatedStaffMembers" => [
-					[
-						'role' => 'Primary Owner',
-						'id' => $agent_id,
-					]
-				]
-			]
-		];
-
-        $update = $client->put( "contacts/{$contact_id}", $contact_body);
+        $contact_body = [ 
+            'contact' => [ 
+                "attachedRelatedStaffMembers" => [ 
+                    [ 
+                        'role' => 'Primary Owner',
+                        'id'   => $agent_id,
+                    ],
+                ],
+            ],
+        ];
 
 
-        // Log results
-        if( isset( $update['http'] ) ) {
-            $this->_logger->log_error( "(Enquiry Submission) {$update['message']} " );
+        if( $contact_id !== "") {
+            $this->put_contacts( $contact_id, $contact_body );
         } else {
+            $this->_logger->log_error( "no contact id" );
+        }
+        
+    }
+
+    /**
+     * Sends a put request to the contacts endpoint
+     *
+     * @param array $update_payload
+     * @return void
+     */
+    public function put_contacts( $contact_id, $update_payload )
+    {
+        $client = new AgentBoxClient();
+        $update = $client->put( "contacts/{$contact_id}", $update_payload );
+
+        // Log the results
+        if( isset( $update['http'] ) ) {
+            $this->_logger->log( "(Enquiry Submission) {$update['message']} " );
+        } else {    
             $this->_logger->log_debug( "(Enquiry Submission) {$update['response']['code']} {$update['response']['message']}" );
         }
     }
