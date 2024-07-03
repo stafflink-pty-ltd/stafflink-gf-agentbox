@@ -11,6 +11,7 @@ class Agentbox_bootstrap
         require_once dirname( __FILE__ ) . '/classes/Inc/class-endpoint-configuration.php';
         require_once dirname( __FILE__ ) . '/classes/Inc/interface-connection.php';
         require_once dirname( __FILE__ ) . '/classes/Inc/class-logger.php';
+        require_once dirname( __FILE__ ) . '/classes/Inc/class-epl-integration.php';
 
         require_once dirname( __FILE__ ) . '/classes/Agentbox/class-agentbox.php';
         require_once dirname( __FILE__ ) . '/classes/Agentbox/class-agentbox-contact.php';
