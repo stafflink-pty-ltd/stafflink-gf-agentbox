@@ -52,3 +52,8 @@ AGENTBOX_CLIENT_SECRET=''
     - Create a new feed
     - Configure the feed by mapping the Gravity form fields to Agentbox fields.
 3. Save and Test
+
+# Change logs
+
+##### 1.0.0
+- Initial Release
