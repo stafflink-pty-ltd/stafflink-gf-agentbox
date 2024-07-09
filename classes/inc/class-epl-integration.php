@@ -1,7 +1,8 @@
 <?php
 namespace GFAgentbox\Inc;
 
-class AgentboxEPLIntegration {
+class AgentboxEPLIntegration
+{
 
 
     /**
@@ -15,21 +16,22 @@ class AgentboxEPLIntegration {
         return ( is_plugin_active( 'easy-property-listings/easy-property-listings.php' ) );
     }
 
-    public function get_listing_by_url( $listing_url )
+    /**
+     * Get the listing unique ID
+     *
+     * @param string $listing_url
+     * @return string|null
+     */
+    public function get_unique_id_by_listing_url( $listing_url )
     {
-        if ( preg_match('/\/?property\/(.*)$/', $listing_url, $match) ) {
-            $postID = url_to_postid($listing_url);
-        } else {
-            $postID = "";
+        $post_id = url_to_postid( $listing_url );
+
+        $post_type = get_post_type( $post_id );
+
+        if ( 'property' !== $post_type ) {
+            return null;
         }
-    
-        return get_post_meta($postID, 'property_unique_id', true);
+
+        return get_post_meta( $post_id, 'property_unique_id', true );
     }
-
-    public function get_unique_id( $property_address )
-    {
-
-    }
-
-
 }

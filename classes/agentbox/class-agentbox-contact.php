@@ -88,7 +88,6 @@ class AgentboxContact
     public function __construct( $contact, $request_type = 'enquiry', AgentboxClass $agentbox = null )
     {
         $this->_initial_contact = $contact;
-        $this->_contact         = $this->create_body( $request_type );
         $this->_request_type    = $request_type;
         $this->agentbox         = $agentbox;
     }
@@ -102,7 +101,7 @@ class AgentboxContact
      */
     public function get( $request_type = '' )
     {
-        return !empty( $this->_contact ) ? $this->_contact : $this->create_body( $this->_request_type );
+        return $this->create_body( $this->_request_type );
     }
 
     /**
@@ -137,15 +136,15 @@ class AgentboxContact
                 "comment"         => $comment,
                 "source"          => $this->_source,
                 "attachedContact" => $this->_attached_contact,
-            ]
+            ],
         ];
-        
+
         // Extract Agency information
         $property = $this->get_property();
 
         // if property exists, save the property ID then append the listing agent to the contact
-        if( $property !== "" ) {
-            $body['enquiry']["attachedListing"]["id"] = $property;
+        if ( $property !== "" ) {
+            $body['enquiry']["attachedListing"]["id"]                             = $property;
             $body['enquiry']['attachedContact']['actions']['attachListingAgents'] = true;
         }
 
@@ -167,11 +166,11 @@ class AgentboxContact
 
         // Create comment body
         foreach ( $this->_initial_contact as $type => $value ) {
-            if( is_array( $value ) ) {
-                $val = implode( ', ', $value);
+            if ( is_array( $value ) ) {
+                $val     = implode( ', ', $value );
                 $comment .= "{$type}: {$val} <br />" . PHP_EOL;
             } else {
-                $comment .= "{$type}: {$value} <br />" . PHP_EOL; 
+                $comment .= "{$type}: {$value} <br />" . PHP_EOL;
             }
         }
 
@@ -186,7 +185,7 @@ class AgentboxContact
      *
      * @return string
      */
-    public function get_comment() : string
+    public function get_comment(): string
     {
         return $this->_comment == "" ? $this->create_comment() : $this->_comment;
     }
@@ -201,31 +200,48 @@ class AgentboxContact
     {
         $epl = new AgentboxEPLIntegration();
 
-        if( $epl->is_active() ) {
+        if ( $epl->is_active() ) {
+
             // EPL integrated step
-            if( rgar( $this->_initial_contact, 'Source' ) !== "" ) {
-                return $epl->get_listing_by_url( rgar( $this->_initial_contact, 'Source' ) );
+            if ( rgar( $this->_initial_contact, 'Source' ) !== "" ) {
+
+                if ( null !== $epl->get_unique_id_by_listing_url( rgar( $this->_initial_contact, 'Source' ) ) ) {
+                    return $epl->get_unique_id_by_listing_url( rgar( $this->_initial_contact, 'Source' ) );
+                }
+
             }
-        }
+
+            // For sources
+            if ( rgar( $this->_initial_contact, 'epl_property_url' ) !== "" ) {
+                if ( null !== $epl->get_unique_id_by_listing_url( rgar( $this->_initial_contact, 'epl_property_url' ) ) ) {
+                    return $epl->get_unique_id_by_listing_url( rgar( $this->_initial_contact, 'epl_property_url' ) );
+                }
+            }
+        } // If both statements above returned false, continue with code below
 
         // If the properties agentbox was sent by user, return with the result quickly
         if ( rgar( $this->_initial_contact, 'Property Agentbox ID' ) !== "" ) {
             return rgar( $this->_initial_contact, 'Property Agentbox ID' );
         }
-        
-        // for property address
-        // if ( rgar( $this->_initial_contact, 'Property Address' ) !== "" ) {
-        //     $address = rgar( $this->_initial_contact, 'Source' );
-        //     // return get_unique_id_by_listing($address);
-        // }
 
         // If they gave property post id
         if ( rgar( $this->_initial_contact, 'Property Post ID' ) !== "" ) {
-            $id = rgar( $this->_initial_contact, 'Property Post ID' );
-            $unique_id = get_post_meta( $id, 'property_unique_id', true );    
+            $id        = rgar( $this->_initial_contact, 'Property Post ID' );
+            $unique_id = get_post_meta( $id, 'property_unique_id', true );
 
             return $unique_id;
         }
+    }
+
+    /**
+     * Set the property url
+     *
+     * @param string $property
+     * @return void
+     */
+    public function set_property_url( $property ): void
+    {
+        $this->_initial_contact['epl_property_url'] = $property;
     }
 
     /**
@@ -235,16 +251,18 @@ class AgentboxContact
      */
     protected function has_property_key()
     {
-        $keys = [
-            'Property Agentbox ID', 'Property Address', 'Property Post ID'
+        $keys = [ 
+            'Property Agentbox ID',
+            'Property Address',
+            'Property Post ID',
         ];
 
         $has_property_key = false;
 
-        foreach( $keys as $key ) {
-            if( rgar( $this->_initial_contact, 'Property Post ID' ) !== "" ) {
+        foreach ( $keys as $key ) {
+            if ( rgar( $this->_initial_contact, 'Property Post ID' ) !== "" ) {
                 $has_property_key = true;
-                continue;   
+                continue;
             }
         }
 
@@ -336,12 +354,12 @@ class AgentboxContact
      */
     public function __toString()
     {
-         //Extract Agentbox required fields
-         $firstName = $this->get_first_name() ?: "";
-         $lastName  = $this->get_last_name() ?: "";
-         $email     = $this->get_email() ?: "";
-         $mobile    = $this->get_mobile() ?: "";
+        //Extract Agentbox required fields
+        $firstName = $this->get_first_name() ?: "";
+        $lastName  = $this->get_last_name() ?: "";
+        $email     = $this->get_email() ?: "";
+        $mobile    = $this->get_mobile() ?: "";
 
-         return $firstName . " " . $lastName . " - " . $email;
+        return $firstName . " " . $lastName . " - " . $email;
     }
 }

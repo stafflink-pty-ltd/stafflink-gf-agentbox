@@ -121,6 +121,12 @@ class AgentboxClass
         $request_type = 'enquiry';
         $client       = new AgentBoxClient();
 
+        // Use to get the source url and for EPL to start
+        if( ! empty( $this->_gravityforms ) ) {
+            $source_url = $this->_gravityforms['entry']['source_url'];
+            $this->_state->set_property_url( $source_url );
+        }
+
         // Create post request for enquiries
         $feed = $this->_state->get( $request_type );
 
@@ -145,6 +151,7 @@ class AgentboxClass
             
 
             // Continue with the enquiry process
+            return $enquiry_contact;
             
             
 
@@ -161,14 +168,12 @@ class AgentboxClass
      */
     public function attach_agent( $user_contact )
     {
-        // Default behavior: 
+        // NOTE: Default behavior: 
+        // =========================================================
         // Check if contact already has a primary owner.
         // Check if there is an agent attached to the feed
         // Check if there is a default agent saved in the settings
-        // if ( $this->_options['save_primary_owner_default'] ) {
-        //     $contact = $this->contacts( [ '' ] );
-        //     $this->_state->attach_agent( $contact );
-        // }
+        // =========================================================
 
         // Check if user is registered, quickly return if not
         if( ! $user_contact ) {
@@ -288,7 +293,6 @@ class AgentboxClass
 
         $this->_logger->log_info( 'Adding primary owner: ' . $agent_email );
         $contact_id = "";
-
 
         // READ: Main point of this code is to get the ID of the contact/enquirer in agentbox
         //       then pass it to the PUT request for the primary owner processing

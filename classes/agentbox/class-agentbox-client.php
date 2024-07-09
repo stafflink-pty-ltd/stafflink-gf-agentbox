@@ -121,9 +121,14 @@ class AgentBoxClient extends Base_Connection implements ConnectionInterface
 
         // Set the body of the request;
         $this->config->setBody( $request_body );
+
+        // $this->log( print_r($request_body) );
+
         $this->config->convertToJSON( 'body' );
 
         $response = wp_remote_post( $endpoint, $this->config->get_configs() );
+
+        // $this->log( print_r($response) );
 
         return $this->response( $response );
     }

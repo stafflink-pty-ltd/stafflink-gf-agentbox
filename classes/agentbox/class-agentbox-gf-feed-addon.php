@@ -387,14 +387,14 @@ class GF_Agentbox extends GFFeedAddOn
 	 */
 	public function process_feed( $feed, $entry, $form )
 	{
-		self::$logger->log( __METHOD__ . '(): Processing feed.' );
-
 		// Start creating enquiry for feed.
 		$res = $this->create_enquiry( $feed, $entry, $form );
 
+		self::$logger->log_debug($res);
+
 		// Add notes after
 		if ( $res ) {
-			// notes here
+			$this->add_note( $form['id'], 'Agentbox Entry created' );
 		}
 
 
@@ -411,7 +411,7 @@ class GF_Agentbox extends GFFeedAddOn
 	 */
 	public function create_enquiry( $feed, $entry, $form )
 	{
-		self::$logger->log( 'Start Enquiry' ); // start logs
+		self::$logger->log( 'Start Enquiry ===========' ); // start logs
 
 		// Get all information from feed
 		$data          = [];
@@ -453,30 +453,18 @@ class GF_Agentbox extends GFFeedAddOn
 
 		$agentbox_feed = apply_filters( 'gravityformsagentbox/agentbox-create-enquiry-feed', $data, $mapped_fields, $feed, $entry, $form );
 
-		self::$logger->log( __METHOD__ . '(): Data ' . var_export( $data, true ) ); // Test log if working here
-
 		// Create Enquiry;
 		$response = "";
 
 		try {
 			$agentbox_class = new AgentboxClass( $agentbox_feed, $this->get_plugin_settings() );
 			$agentbox_class->gravity_form( compact( 'feed', 'entry', 'form' ) );
+			$response = $agentbox_class->enquiries();
 
-			error_log( var_export($feed) );
-
-			// $ab = $agentbox_class->enquiries();
-
-			
-
-			$this->add_note( $feed['form_id'], 'Agentbox Entry created' );
-
-			// $response = $agentbox_class->enquiries();
 		} catch ( \Exception $e ) {
 			// Log error
 			self::$logger->log( __METHOD__ . '(): Unable to send enquiry' );
-
 		}
-
 
 		// Add action after logging
 		do_action(
@@ -489,8 +477,11 @@ class GF_Agentbox extends GFFeedAddOn
 			$form
 		);
 
+		self::$logger->log( 'End Enquiry ===========' ); // end logs
 
-		self::$logger->log( 'End Enquiry' ); // end logs
+		if( isset($response) ) {
+			return $response;
+		}
 		return [];
 	}
 
