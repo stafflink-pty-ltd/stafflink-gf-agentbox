@@ -17,7 +17,7 @@ if ( !defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-require_once('vendor/autoload.php');
+require_once __DIR__.'/vendor/autoload.php';
 
 if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 
