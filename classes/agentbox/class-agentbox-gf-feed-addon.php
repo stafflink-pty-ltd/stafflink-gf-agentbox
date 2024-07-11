@@ -387,14 +387,27 @@ class GF_Agentbox extends GFFeedAddOn
 	 */
 	public function process_feed( $feed, $entry, $form )
 	{
+		// Test Agentbox connection first, if no connection has been made, return immediately
+		$ab_class = new AgentboxClass;
+		if ( ! $ab_class->test_connection() ) {
+			// Log all errors in connections
+			$this->add_note(  $entry['id'], 'Access Denied, please check your credentials and try again', 'ERROR');
+			self::$logger->log('Agentbox connection: Access Denied');
+			error_log('Agentbox connection: Access Denied');
+			return [];
+		}
+
 		// Start creating enquiry for feed.
 		$res = $this->create_enquiry( $feed, $entry, $form );
 
-		self::$logger->log_debug($res);
-
-		// Add notes after
 		if ( $res ) {
-			$this->add_note( $form['id'], 'Agentbox Entry created' );
+			if ( 200 == $res['response']['response']['code'] ) {
+				$this->add_note( $entry['id'], 'Agentbox Entry Status: ' . $res->response->status );
+			}
+
+			if ( 422 == $res['response']['response']['code'] ) {
+				$this->add_note( $entry['id'], 'Agentbox Entry Status: ' . $res->response->status, 'ERROR' );
+			}	
 		}
 
 
@@ -479,9 +492,10 @@ class GF_Agentbox extends GFFeedAddOn
 
 		self::$logger->log( 'End Enquiry ===========' ); // end logs
 
-		if( isset($response) ) {
+		if ( !empty( $response ) ) {
 			return $response;
 		}
+
 		return [];
 	}
 

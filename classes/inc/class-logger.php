@@ -70,7 +70,7 @@ class StafflinkLogger
             return;
         }
 
-        $message = $this->create_message( $message );
+        $message = $this->create_message( $message, $level );
         file_put_contents( $this->log_file, $message, FILE_APPEND );
     }
 
