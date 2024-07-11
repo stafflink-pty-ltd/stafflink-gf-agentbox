@@ -2,6 +2,7 @@
     "name": "stafflink/gravityformsagentbox",
     "description": "form integration with agentbox",
     "type": "wordpress-plugin",
+    "license": "GPL-2.0+",
     "require": {
         "guzzlehttp/guzzle": "^7.8",
         "vlucas/phpdotenv": "^5.6"
