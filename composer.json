@@ -1,5 +1,5 @@
 {
-    "name": "stafflink/gravityformsagentbox",
+    "name": "realcoder/wp-agentbox",
     "description": "form integration with agentbox",
     "type": "wordpress-plugin",
     "license": "GPL-2.0+",
