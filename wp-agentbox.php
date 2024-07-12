@@ -17,8 +17,6 @@ if ( !defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-require_once __DIR__ . '/vendor/autoload.php';
-
 if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 
 	/**
@@ -120,7 +118,6 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 
 			// Define Hook
 			self::action( 'gform_loaded', self::register_addon() );
-			require "vendor/autoload.php";
 		}
 
 		/**

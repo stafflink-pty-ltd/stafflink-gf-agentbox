@@ -1,8 +1,5 @@
 <?php
 // Include the Gravity Forms Add-On Framework
-
-require_once GF_Agentbox_Bootstrap_DIR . '/vendor/autoload.php';
-
 require_once GF_Agentbox_Bootstrap_DIR . '/classes/Inc/class-logger.php';
 require_once GF_Agentbox_Bootstrap_DIR . '/classes/Agentbox/class-agentbox.php';
 

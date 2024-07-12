@@ -16,8 +16,8 @@ namespace GFAgentbox;
  *  @param array $params
  *  @param array $options
  */
-if ( !class_exists( 'AgentBox_Integration' ) ) {
-	class AgentBox_Integration
+if ( !class_exists( 'AgentBoxIntegration' ) ) {
+	class AgentBoxIntegration
 	{
 
 		/**
