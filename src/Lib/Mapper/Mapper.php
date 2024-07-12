@@ -1,6 +1,6 @@
 <?php
 
-namespace Stafflink\Lib\Mapper;
+namespace Realcoder\Lib\Mapper;
 
 class Mapper
 {
@@ -47,11 +47,11 @@ class Mapper
                 'last_name',
                 'lastname',
             ],
-            'mobile' => [
+            'mobile'     => [ 
                 'contact_number',
                 'phone_number',
-                'mobile'
-            ]
+                'mobile',
+            ],
         ];
         $this->keywords = empty( $keywords )
             ? $keys : $keywords;
@@ -72,7 +72,7 @@ class Mapper
      *
      * @return array
      */
-    public function map() : array
+    public function map(): array
     {
 
     }

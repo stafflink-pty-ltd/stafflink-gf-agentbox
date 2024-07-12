@@ -1,16 +1,18 @@
-<?php 
+<?php
 
-namespace Stafflink\Lib;
-use Stafflink\Interface\LoggerInterface;
+namespace Realcoder\Lib;
 
-class StafflinkGravityForm {
+use Realcoder\Interface\LoggerInterface;
+
+class RealcoderGravityForm
+{
 
     private $entry;
 
 
     public function __construct( $entry )
     {
-        $this->entry = $entry;   
+        $this->entry = $entry;
     }
 
 
@@ -25,7 +27,7 @@ class StafflinkGravityForm {
 
     }
 
-    
+
 
 
 

@@ -84,7 +84,7 @@ if ( !class_exists( 'AgentBox_Integration' ) ) {
 		 * Complete a GET request from Agentbox API.
 		 *
 		 * @param string $endpoint      Available endpoints: 'contacts', 'listings', 'suburbs', 'offices', 'staff', etc.
-		 * @param array  $filters        Filter data by key pairs. eg ['email' => 'matt.neal@stafflink.com.au'].
+		 * @param array  $filters        Filter data by key pairs. eg ['email' => 'matt.neal@realcoder.com.au'].
 		 * @param array  $params         Additional paramaters. eg ['page' => 1, 'limit' => 20].
 		 * @return array|false          Returns the result body, or false if failure.
 		 * example: Find a contact by   $endpoint = 'contacts';

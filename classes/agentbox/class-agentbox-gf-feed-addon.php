@@ -58,7 +58,7 @@ class GF_Agentbox extends GFFeedAddOn
 	 *
 	 * @var string
 	 */
-	protected $_path = "gravityformsagentbox/stafflink-gf-agentbox.php";
+	protected $_path = "gravityformsagentbox/wp-agentbox.php";
 
 	/**
 	 * Store all options here
@@ -80,7 +80,7 @@ class GF_Agentbox extends GFFeedAddOn
 	 *
 	 * @var string
 	 */
-	protected $_url = "https://stafflink.com.au";
+	protected $_url = "https://realcoder.com.au";
 
 	/**
 	 * Title of this add-on
@@ -94,7 +94,7 @@ class GF_Agentbox extends GFFeedAddOn
 	 *
 	 * @var string
 	 */
-	protected $_short_title = "Stafflink";
+	protected $_short_title = "Realcoder";
 
 
 	/**
@@ -389,11 +389,11 @@ class GF_Agentbox extends GFFeedAddOn
 	{
 		// Test Agentbox connection first, if no connection has been made, return immediately
 		$ab_class = new AgentboxClass;
-		if ( ! $ab_class->test_connection() ) {
+		if ( !$ab_class->test_connection() ) {
 			// Log all errors in connections
-			$this->add_note(  $entry['id'], 'Access Denied, please check your credentials and try again', 'ERROR');
-			self::$logger->log('Agentbox connection: Access Denied');
-			error_log('Agentbox connection: Access Denied');
+			$this->add_note( $entry['id'], 'Access Denied, please check your credentials and try again', 'ERROR' );
+			self::$logger->log( 'Agentbox connection: Access Denied' );
+			error_log( 'Agentbox connection: Access Denied' );
 			return [];
 		}
 
@@ -407,7 +407,7 @@ class GF_Agentbox extends GFFeedAddOn
 
 			if ( 422 == $res['response']['response']['code'] ) {
 				$this->add_note( $entry['id'], 'Agentbox Entry Status: ' . $res->response->status, 'ERROR' );
-			}	
+			}
 		}
 
 

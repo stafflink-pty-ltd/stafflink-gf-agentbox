@@ -1,13 +1,13 @@
 <?php
 /**
  * Plugin Name:     Gravity Forms - Agentbox Integration
- * Plugin URI:      https://stafflink.com.au/
+ * Plugin URI:      https://realcoder.com.au/
  * Description:     Allows pulling and pushing of data via the Agentbox API.
- * Author:          Stafflink Web Services
- * Author URI:      https://stafflink.com.au/
+ * Author:          RealCoder Pty Ltd
+ * Author URI:      https://realcoder.com.au/
  * Text Domain:     gravityformsagentbox
  * Domain Path:     /languages
- * Version:         1.0.0
+ * Version:         0.1.6
  *
  * @package         SLAB
  */
@@ -17,7 +17,7 @@ if ( !defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-require_once __DIR__.'/vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 
@@ -32,7 +32,7 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 		 *
 		 * @var string
 		 */
-		public static $version = '0.3.0';
+		public static $version = '0.1.6';
 
 		/**
 		 * The plugin settings array.
@@ -79,12 +79,12 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 
 			// Define constants.
 			self::define( 'GF_Agentbox_Bootstrap', true );
-			self::define( 'GF_Agentbox_Bootstrap_DIR', dirname( __FILE__ )  );
+			self::define( 'GF_Agentbox_Bootstrap_DIR', dirname( __FILE__ ) );
 			self::define( 'GF_Agentbox_Bootstrap_PATH', plugin_dir_path( __FILE__ ) );
 			self::define( 'GF_Agentbox_Bootstrap_BASENAME', plugin_basename( __FILE__ ) );
 			self::define( 'GF_Agentbox_Bootstrap_VERSION', self::$version );
 			self::define( 'GF_Agentbox_Bootstrap_MAJOR_VERSION', 1 );
-			self::define( 'GF_Agentbox_assets', plugin_dir_url(__FILE__) );
+			self::define( 'GF_Agentbox_assets', plugin_dir_url( __FILE__ ) );
 
 			// Define settings.
 			self::$settings = array(
@@ -107,7 +107,7 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 			);
 
 			// Include utility functions. 
-	
+
 			require_once dirname( __FILE__ ) . '/classes/Agentbox/class-agentbox-gf-feed-addon.php';
 			require_once WP_CONTENT_DIR . "/plugins/stafflink-gf-agentbox/agentbox-bootstrap.php";
 			$boot = new Agentbox_bootstrap();
@@ -115,9 +115,9 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 
 			// Include admin.
 			if ( is_admin() ) {
-	
+
 			}
-			
+
 			// Define Hook
 			self::action( 'gform_loaded', self::register_addon() );
 			require "vendor/autoload.php";
@@ -157,15 +157,15 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 			if ( !method_exists( 'GFForms', 'include_addon_framework' ) ) {
 				return;
 			}
-			
+
 			GFAddOn::register( 'GF_Agentbox' );
 		}
- 
+
 		public static function create_actions()
 		{
 			$_actions = self::$_actions;
 
-			foreach( $_actions as $_action ) {
+			foreach ( $_actions as $_action ) {
 				add_action( $_action['hook'], $_action['callback'], $_action['priority'], $_action['accepted_args'] );
 			}
 		}
@@ -293,8 +293,8 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 		 */
 		public function new_instance( $class )
 		{
-			$instance                = new $class();
-			$name                    = strtolower( $class );
+			$instance                 = new $class();
+			$name                     = strtolower( $class );
 			self::$instances[ $name ] = $instance;
 			return $instance;
 		}

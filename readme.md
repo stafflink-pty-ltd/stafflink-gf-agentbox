@@ -48,7 +48,7 @@ AGENTBOX_CLIENT_SECRET=''
 # Usage
 1. Create a Form. Create or edit a form using Gravity Forms.
 2. Create an Agentbox Field
-    - Go to the form settings under Stafflink 
+    - Go to the form settings under Realcoder 
     - Create a new feed
     - Configure the feed by mapping the Gravity form fields to Agentbox fields.
 3. Save and Test
