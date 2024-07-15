@@ -16,7 +16,7 @@ namespace GFAgentbox;
  *  @param array $params
  *  @param array $options
  */
-if ( !class_exists( 'AgentBoxIntegration' ) ) {
+if (!class_exists('AgentBoxIntegration')) {
 	class AgentBoxIntegration
 	{
 
@@ -63,19 +63,19 @@ if ( !class_exists( 'AgentBoxIntegration' ) ) {
 
 			$this->headers = array(
 				'Content-Type' => 'application/json',
-				'Accept'       => 'application/json',
-				'X-Client-ID'  => getenv( 'AGENTBOX_CLIENT_ID' ),
-				'X-API-Key'    => getenv( 'AGENTBOX_CLIENT_SECRET' ),
+				'Accept' => 'application/json',
+				'X-Client-ID' => getenv('AGENTBOX_CLIENT_ID'),
+				'X-API-Key' => getenv('AGENTBOX_CLIENT_SECRET'),
 			);
 			$this->options = array(
-				'headers'     => $this->headers,
-				'method'      => 'POST',
+				'headers' => $this->headers,
+				'method' => 'POST',
 				'data_format' => 'body',
 			);
-			$this->url     = 'https://api.agentboxcrm.com.au/';
+			$this->url = 'https://api.agentboxcrm.com.au/';
 			$this->version = 'version=2';
-			$this->params  = array(
-				'page'  => 1,
+			$this->params = array(
+				'page' => 1,
 				'limit' => 20,
 			);
 		}
@@ -89,39 +89,39 @@ if ( !class_exists( 'AgentBoxIntegration' ) ) {
 		 * @return array|false          Returns the result body, or false if failure.
 		 * example: Find a contact by   $endpoint = 'contacts';
 		 */
-		public function get( $endpoint, $filters = array(), $params = array() )
+		public function get($endpoint, $filters = array(), $params = array())
 		{
 
-			if ( empty( $params ) ) {
+			if (empty($params)) {
 				$params = array(
-					'page'  => 1,
+					'page' => 1,
 					'limit' => 20,
 				);
 			}
 
 			$get = $this->url . $endpoint . '?';
 
-			foreach ( $params as $key => $param ) {
+			foreach ($params as $key => $param) {
 				$get .= $key . '=' . $param . '&';
 			}
 
-			if ( $filters ) {
-				foreach ( $filters as $key => $filter ) {
-					$get .= 'filter[' . $key . ']=' . rawurlencode( $filter ) . '&';
+			if ($filters) {
+				foreach ($filters as $key => $filter) {
+					$get .= 'filter[' . $key . ']=' . rawurlencode($filter) . '&';
 				}
 			}
 			$get .= $this->version;
 
-			$response = wp_remote_get( $get, array( 'headers' => $this->headers ) );
+			$response = wp_remote_get($get, array('headers' => $this->headers));
 
-			if ( is_wp_error( $response ) || !is_array( $response ) || 200 !== $response['response']['code'] ) {
-				if ( defined( 'WP_DEBUG' ) && WP_DEBUG === true ) {
+			if (is_wp_error($response) || !is_array($response) || 200 !== $response['response']['code']) {
+				if (defined('WP_DEBUG') && WP_DEBUG === true) {
 					// phpcs:disable WordPress.PHP.DevelopmentFunctions
-					error_log( 'Failed to \'GET\' from endpoint: ' . $endpoint . ' Response code: ' . $response['response']['code'] . ' ' . $response['response']['message'], 0 );
-					error_log( 'Filters: ', 0 );
-					error_log( print_r( $filters, true ), 0 );
-					error_log( 'Params: ', 0 );
-					error_log( print_r( $params, true ), 0 );
+					error_log('Failed to \'GET\' from endpoint: ' . $endpoint . ' Response code: ' . $response['response']['code'] . ' ' . $response['response']['message'], 0);
+					error_log('Filters: ', 0);
+					error_log(print_r($filters, true), 0);
+					error_log('Params: ', 0);
+					error_log(print_r($params, true), 0);
 					// phpcs:enable
 				}
 
@@ -141,15 +141,15 @@ if ( !class_exists( 'AgentBoxIntegration' ) ) {
 		 * example: Add a contact       $endpoint = 'contacts';
 		 *                              $body = ['firstName' => 'bob', 'lastName' => 'marley', 'email' => 'bob@marley.com'];
 		 */
-		public function post( $endpoint, $body )
+		public function post($endpoint, $body)
 		{
 
-			$this->options['body'] = wp_json_encode( $body );
-			$response              = wp_remote_post( $this->url . $endpoint . '?' . $this->version, $this->options );
+			$this->options['body'] = wp_json_encode($body);
+			$response = wp_remote_post($this->url . $endpoint . '?' . $this->version, $this->options);
 
-			if ( is_wp_error( $response ) || !is_array( $response ) ) {
-				error_log( 'Failed to post to agentbox. Endpoint: ' . $endpoint . '. body: ', 0 );
-				error_log( print_r( $body, true ), 0 );
+			if (is_wp_error($response) || !is_array($response)) {
+				error_log('Failed to post to agentbox. Endpoint: ' . $endpoint . '. body: ', 0);
+				error_log(print_r($body, true), 0);
 				return false;
 			} else {
 				return $response;
@@ -168,21 +168,21 @@ if ( !class_exists( 'AgentBoxIntegration' ) ) {
 		 *                              $body = ['contact']['firstName' => 'matt', 'lastName' => 'neal'];
 		 *                              $endpoint_id = 240966;
 		 */
-		public function put( $endpoint, $body, $endpoint_id )
+		public function put($endpoint, $body, $endpoint_id)
 		{
 
-			$put  = $this->url . $endpoint . '/' . $endpoint_id . '?' . $this->version;
-			$body = wp_json_encode( $body );
+			$put = $this->url . $endpoint . '/' . $endpoint_id . '?' . $this->version;
+			$body = wp_json_encode($body);
 
 			$this->options['method'] = 'PUT';
-			$this->options['body']   = $body;
+			$this->options['body'] = $body;
 
-			$response = wp_remote_request( $put, $this->options );
+			$response = wp_remote_request($put, $this->options);
 
-			if ( is_wp_error( $response ) || !is_array( $response ) ) {
-				error_log( 'Failed to update ' . $endpoint . '. body: ', 0 );
-				error_log( print_r( $body, true ), 0 );
-				error_log( 'Endpoint ID ( the item to update, generally a contact): ' . $endpoint_id, 0 );
+			if (is_wp_error($response) || !is_array($response)) {
+				error_log('Failed to update ' . $endpoint . '. body: ', 0);
+				error_log(print_r($body, true), 0);
+				error_log('Endpoint ID ( the item to update, generally a contact): ' . $endpoint_id, 0);
 				return false;
 			} else {
 				return $response;
@@ -195,17 +195,17 @@ if ( !class_exists( 'AgentBoxIntegration' ) ) {
 		 * @param string $listing_id unique listing id from the propety.
 		 * @return string The body of the response. Empty string if no body or incorrect parameter given.
 		 */
-		public function get_listing( $listing_id )
+		public function get_listing($listing_id)
 		{
 
-			$get      = $this->url . 'listings/' . $listing_id . '?' . $this->version;
-			$response = wp_remote_get( $get, array( 'headers' => $this->headers ) );
+			$get = $this->url . 'listings/' . $listing_id . '?' . $this->version;
+			$response = wp_remote_get($get, array('headers' => $this->headers));
 
-			if ( is_wp_error( $response ) || !is_array( $response ) || 200 !== $response['response']['code'] ) {
-				error_log( 'Failed to \'GET\' from endpoint: ' . '"listings"' . '. Response code: ' . $response['response']['code'] . ' ' . $response['response']['message'], 0 );
+			if (is_wp_error($response) || !is_array($response) || 200 !== $response['response']['code']) {
+				error_log('Failed to \'GET\' from endpoint: ' . '"listings"' . '. Response code: ' . $response['response']['code'] . ' ' . $response['response']['message'], 0);
 				return false;
 			} else {
-				return wp_remote_retrieve_body( $response );
+				return wp_remote_retrieve_body($response);
 			}
 		}
 
@@ -215,19 +215,19 @@ if ( !class_exists( 'AgentBoxIntegration' ) ) {
 		 * @param string $listing_id unique listing id from the propety.
 		 * @return string The body of the response. Empty string if no body or incorrect parameter given.
 		 */
-		public function get_full_listing( $listing_id )
+		public function get_full_listing($listing_id)
 		{
 
-			$include  = 'include=images%2CfloorPlans%2Cdocuments%2CexternalLinks%2CrelatedStaffMembers%2CinspectionDates%2CextraFields&';
-			$get      = $this->url . 'listings/' . $listing_id . '?' . $include . $this->version;
-			$response = wp_remote_get( $get, array( 'headers' => $this->headers ) );
+			$include = 'include=images%2CfloorPlans%2Cdocuments%2CexternalLinks%2CrelatedStaffMembers%2CinspectionDates%2CextraFields&';
+			$get = $this->url . 'listings/' . $listing_id . '?' . $include . $this->version;
+			$response = wp_remote_get($get, array('headers' => $this->headers));
 
-			if ( is_wp_error( $response ) || !is_array( $response ) || 200 !== $response['response']['code'] ) {
-				error_log( 'Failed to get the full listing from AgentBox. Response code: ' . $response['response']['code'] . ' ' . $response['response']['message'], 0 );
-				error_log( 'Class ocre\Agentbox_Contact. listing ID: ' . $listing_id, 0 );
+			if (is_wp_error($response) || !is_array($response) || 200 !== $response['response']['code']) {
+				error_log('Failed to get the full listing from AgentBox. Response code: ' . $response['response']['code'] . ' ' . $response['response']['message'], 0);
+				error_log('Class ocre\Agentbox_Contact. listing ID: ' . $listing_id, 0);
 				return false;
 			} else {
-				return wp_remote_retrieve_body( $response );
+				return wp_remote_retrieve_body($response);
 			}
 		}
 

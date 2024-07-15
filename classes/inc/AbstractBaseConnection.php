@@ -3,7 +3,7 @@ namespace GFAgentbox\Inc;
 
 use GFAgentbox\Inc\EndpointConfiguration;
 
-abstract class Base_Connection
+abstract class AbstractBaseConnection
 {
     /**
      * Undocumented variable
@@ -19,7 +19,7 @@ abstract class Base_Connection
      */
     protected $endpoint;
 
-     /**
+    /**
      * String of the version.
      *
      * @var string $domain Sets the main domain of the endpoint
@@ -38,7 +38,7 @@ abstract class Base_Connection
      *
      * @var array $query_string contains the query strings
      */
-    
+
     protected $query_string = [];
 
     /**
@@ -68,12 +68,12 @@ abstract class Base_Connection
      *
      * @param array $headers
      */
-    public function __construct( $headers = [] )
+    public function __construct($headers = [])
     {
         $this->headers = $headers;
-        $this->config  = new EndpointConfiguration( $this->headers );
+        $this->config = new EndpointConfiguration($this->headers);
 
-    } 
+    }
 
     /**
      * Undocumented function
@@ -81,7 +81,7 @@ abstract class Base_Connection
      * @param [type] $resource
      * @return string
      */
-    protected function create_endpoint( $resource )
+    protected function create_endpoint($resource)
     {
         $params = $this->create_http_query_params();
 
@@ -91,6 +91,6 @@ abstract class Base_Connection
     /** */
     protected function create_http_query_params()
     {
-        return http_build_query( $this->config->params );
+        return http_build_query($this->config->params);
     }
 }

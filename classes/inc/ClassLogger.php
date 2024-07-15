@@ -5,7 +5,7 @@ namespace GFAgentbox\Inc;
 /**
  * Class that creates own log file
  */
-class StafflinkLogger
+class ClassLogger
 {
     /**
      * File path of the log file
@@ -26,9 +26,9 @@ class StafflinkLogger
      *
      * @var array
      */
-    protected $log_level = [ 
+    protected $log_level = [
         'DEBUG' => 0,
-        'INFO'  => 1,
+        'INFO' => 1,
         'ERROR' => 2,
     ];
 
@@ -38,11 +38,11 @@ class StafflinkLogger
      * @param string $file_path
      * @param string $file_name
      */
-    public function __construct( $file_path = "", $file_name = "sl_debug" )
+    public function __construct($file_path = "", $file_name = "sl_debug")
     {
         $this->file_name = $file_name;
         // create the log file
-        $this->log_file = $this->set_log_file( $file_path );
+        $this->log_file = $this->set_log_file($file_path);
     }
 
     /**
@@ -51,9 +51,9 @@ class StafflinkLogger
      * @param string $file_path
      * @return string
      */
-    public function set_log_file( $file_path )
+    public function set_log_file($file_path)
     {
-        return ( $file_path == "" ) ? WP_CONTENT_DIR . "/{$this->file_name}.log" : $file_path;
+        return ($file_path == "") ? WP_CONTENT_DIR . "/{$this->file_name}.log" : $file_path;
     }
 
 
@@ -64,14 +64,14 @@ class StafflinkLogger
      * @param string $level
      * @return void
      */
-    public function log( $message, $level = "INFO" )
+    public function log($message, $level = "INFO")
     {
-        if ( !$this->log_level[ $level ] ) {
+        if (!$this->log_level[$level]) {
             return;
         }
 
-        $message = $this->create_message( $message, $level );
-        file_put_contents( $this->log_file, $message, FILE_APPEND );
+        $message = $this->create_message($message, $level);
+        file_put_contents($this->log_file, $message, FILE_APPEND);
     }
 
     /**
@@ -80,9 +80,9 @@ class StafflinkLogger
      * @param string $message
      * @return void
      */
-    public function log_info( $message )
+    public function log_info($message)
     {
-        $this->log( $message, 'INFO' );
+        $this->log($message, 'INFO');
     }
 
     /**
@@ -91,9 +91,9 @@ class StafflinkLogger
      * @param string $message
      * @return void
      */
-    public function log_debug( $message )
+    public function log_debug($message)
     {
-        $this->log( $message, 'DEBUG' );
+        $this->log($message, 'DEBUG');
     }
 
     /**
@@ -102,9 +102,9 @@ class StafflinkLogger
      * @param string $message
      * @return void
      */
-    public function log_error( $message )
+    public function log_error($message)
     {
-        $this->log( $message, 'ERROR' );
+        $this->log($message, 'ERROR');
     }
 
     /**
@@ -113,10 +113,10 @@ class StafflinkLogger
      * @param array $array
      * @return void
      */
-    public function log_array( $array )
+    public function log_array($array)
     {
-        if( defined(WP_DEBUG) && WP_DEBUG ) {
-            $this->log( var_export($array, true), 'DEBUG' );
+        if (defined(WP_DEBUG) && WP_DEBUG) {
+            $this->log(var_export($array, true), 'DEBUG');
         }
     }
 
@@ -127,10 +127,10 @@ class StafflinkLogger
      * @param string $level
      * @return string
      */
-    public function create_message( $message, $level = "INFO" ): string
+    public function create_message($message, $level = "INFO"): string
     {
-        $timestamp = date( 'Y-m-d H:i:s' );
-        $message   = "[{$timestamp}]~log[{$this->log_level[$level]}]: {$message}" . PHP_EOL;
+        $timestamp = date('Y-m-d H:i:s');
+        $message = "[{$timestamp}]~log[{$this->log_level[$level]}]: {$message}" . PHP_EOL;
 
         return $message;
     }

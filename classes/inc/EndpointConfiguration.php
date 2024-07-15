@@ -16,7 +16,7 @@ class EndpointConfiguration
     public $config = [];
 
 
-    public function __construct( array $config )
+    public function __construct(array $config)
     {
         $this->config = $config;
     }
@@ -32,9 +32,9 @@ class EndpointConfiguration
      * @param array $options
      * @return void
      */
-    public function set( $options )
+    public function set($options)
     {
-        $this->config = array_replace_recursive( $this->config, $options );
+        $this->config = array_replace_recursive($this->config, $options);
     }
 
     /**
@@ -43,7 +43,7 @@ class EndpointConfiguration
      * @param string $method
      * @return void
      */
-    public function set_method( $method )
+    public function set_method($method)
     {
         $this->config['method'] = $method;
     }
@@ -54,13 +54,14 @@ class EndpointConfiguration
      * @param [type] $key
      * @return boolean
      */
-    public function has( $key )
+    public function has($key)
     {
         // check if key is set
-        if(isset($this->config[$key])) {
+        if (isset($this->config[$key])) {
             // return whether the array is empty or not
-            return ! empty( $this->config[$key]);
-        };
+            return !empty($this->config[$key]);
+        }
+        ;
 
         return false;
     }
@@ -71,10 +72,10 @@ class EndpointConfiguration
      * @param [type] $key
      * @return void
      */
-    public function convertToJSON( $key ) 
+    public function convertToJSON($key)
     {
-        $saved_array = $this->config[ $key ];
-        
+        $saved_array = $this->config[$key];
+
         $this->config[$key] = json_encode($saved_array);
     }
 
@@ -85,7 +86,7 @@ class EndpointConfiguration
      * @param [type] $key
      * @return array
      */
-    public function __get( $key )
+    public function __get($key)
     {
         return [$key => $this->config[$key]];
     }
@@ -96,9 +97,9 @@ class EndpointConfiguration
      * @param string $key
      * @param string|array $value
      */
-    public function __set( $key, $value )
+    public function __set($key, $value)
     {
-        $this->config[ $key ] = $value;
+        $this->config[$key] = $value;
     }
 
     /**
@@ -108,29 +109,29 @@ class EndpointConfiguration
      * @param [type] $arguments
      * @return void
      */
-    public function __call( $method, $arguments )
+    public function __call($method, $arguments)
     {
         // For get methods
-        if ( str_contains( $method, 'get' ) ) {
-            $key = str_replace( 'get', '', $method ); // remove 'get'
-            $key = $this->camel_to_kebab( $key ); // convert to proper case
+        if (str_contains($method, 'get')) {
+            $key = str_replace('get', '', $method); // remove 'get'
+            $key = $this->camel_to_kebab($key); // convert to proper case
 
             // Check if key is in array
             return isset($this->config[$key]) ? $this->config[$key] : null;
         }
 
         // For set methods
-        if ( str_contains( $method, 'set' ) ) {
-            $key = str_replace( 'set', '', $method ); // remove 'get'
-            $key = $this->camel_to_kebab( $key ); // convert to proper case
-            
+        if (str_contains($method, 'set')) {
+            $key = str_replace('set', '', $method); // remove 'get'
+            $key = $this->camel_to_kebab($key); // convert to proper case
+
             $merge = [];
 
             // save key and arguments
-            foreach( $arguments as $argument ) {
+            foreach ($arguments as $argument) {
                 $merge = array_merge_recursive($merge, $argument);
             }
-            
+
             $this->config[$key] = $merge;
         }
 
@@ -154,9 +155,9 @@ class EndpointConfiguration
      * @param string $string
      * @return string string in kebab format
      */
-    private function camel_to_kebab( $string )
+    private function camel_to_kebab($string)
     {
-        return strtolower( preg_replace( '/([a-z])([A-Z])/', '$1-$2', $string ) );
+        return strtolower(preg_replace('/([a-z])([A-Z])/', '$1-$2', $string));
     }
 
 

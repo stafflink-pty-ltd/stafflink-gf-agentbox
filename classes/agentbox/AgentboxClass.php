@@ -3,7 +3,7 @@ namespace GFAgentbox\Agentbox;
 
 use GFAgentbox\Agentbox\AgentBoxClient;
 use GFAgentbox\Agentbox\AgentboxContact;
-use GFAgentbox\Inc\StafflinkLogger;
+use GFAgentbox\Inc\ClassLogger;
 
 /**
  * AGENTBOX WRAPPER CLASS
@@ -39,7 +39,7 @@ class AgentboxClass
     /**
      * Create a logger for Agentbox
      *
-     * @var StafflinkLogger
+     * @var ClassLogger
      */
     protected $_logger;
 
@@ -55,12 +55,12 @@ class AgentboxClass
      *
      * @var array
      */
-    protected $_options = [ 
-        'return_type'                => 'object',
-        'attached_listing'           => true,
-        'contact_class_appendable'   => true, // Used for contact classes saving
+    protected $_options = [
+        'return_type' => 'object',
+        'attached_listing' => true,
+        'contact_class_appendable' => true, // Used for contact classes saving
         'save_primary_owner_default' => true, // Used for using default OC behavior in saving and checking for primary owners
-        'related_staff_appendable'   => true, // When set to false staff member will be overridden, when set to true related staff will be appended
+        'related_staff_appendable' => true, // When set to false staff member will be overridden, when set to true related staff will be appended
     ];
 
     /**
@@ -91,13 +91,13 @@ class AgentboxClass
      * @param string $source Default value: 'website'
      * @param array $options
      */
-    public function __construct( $feed = [], $options = [], $source = "website" )
+    public function __construct($feed = [], $options = [], $source = "website")
     {
-        $this->_feed    = $feed;
-        $this->_source  = $source;
-        $this->_options = array_merge( $this->_options, $options );
-        $this->_state   = new AgentboxContact( $feed );
-        $this->_logger  = new StafflinkLogger;
+        $this->_feed = $feed;
+        $this->_source = $source;
+        $this->_options = array_merge($this->_options, $options);
+        $this->_state = new AgentboxContact($feed);
+        $this->_logger = new ClassLogger;
     }
 
     /**
@@ -109,9 +109,9 @@ class AgentboxClass
     {
         $client = new AgentBoxClient();
 
-        $response = $client->get('contacts'); 
+        $response = $client->get('contacts');
 
-        if ( 401 === $response['response']['code'] ) {
+        if (401 === $response['response']['code']) {
             return false;
         }
 
@@ -124,9 +124,9 @@ class AgentboxClass
      * @param array $args
      * @return void
      */
-    public function gravity_form( $args )
+    public function gravity_form($args)
     {
-        $this->_gravityforms = array_merge( $this->_gravityforms, $args );
+        $this->_gravityforms = array_merge($this->_gravityforms, $args);
     }
 
     /**
@@ -137,36 +137,36 @@ class AgentboxClass
     public function enquiries()
     {
         $request_type = 'enquiry';
-        $client       = new AgentBoxClient();
+        $client = new AgentBoxClient();
 
         // Use to get the source url and for EPL to start
-        if ( !empty( $this->_gravityforms ) ) {
+        if (!empty($this->_gravityforms)) {
             $source_url = $this->_gravityforms['entry']['source_url'];
-            $this->_state->set_property_url( $source_url );
+            $this->_state->set_property_url($source_url);
         }
 
         // Create post request for enquiries
-        $feed = $this->_state->get( $request_type );
+        $feed = $this->_state->get($request_type);
 
         try {
             // Send Enquiry
-            $this->_logger->log( 'Creating Enquiries for: ' . $this->_state );
-            $enquiry_res = $client->post( 'enquiries', $feed );
+            $this->_logger->log('Creating Enquiries for: ' . $this->_state);
+            $enquiry_res = $client->post('enquiries', $feed);
 
             // Log results
-            if ( isset( $enquiry_res['http'] ) ) {
-                $this->_logger->log_error( "(Enquiry Submission) {$enquiry_res['message']} " );
+            if (isset($enquiry_res['http'])) {
+                $this->_logger->log_error("(Enquiry Submission) {$enquiry_res['message']} ");
 
                 return $enquiry_res;
             } else {
-                $this->_logger->log_debug( "(Enquiry Submission) {$enquiry_res['response']['code']} {$enquiry_res['response']['message']}" );
+                $this->_logger->log_debug("(Enquiry Submission) {$enquiry_res['response']['code']} {$enquiry_res['response']['message']}");
             }
 
-            $enquiry_contact = json_decode( $enquiry_res['body'] );
+            $enquiry_contact = json_decode($enquiry_res['body']);
 
             // Do Agent Process next
-            if ( $this->_state->get_agent_email() !== "" ) {
-                $agent_res = $this->attach_agent( $enquiry_contact );
+            if ($this->_state->get_agent_email() !== "") {
+                $agent_res = $this->attach_agent($enquiry_contact);
             }
 
 
@@ -175,8 +175,8 @@ class AgentboxClass
 
 
 
-        } catch ( \Exception $e ) {
-            $this->_logger->log_error( $e->getMessage() );
+        } catch (\Exception $e) {
+            $this->_logger->log_error($e->getMessage());
         }
     }
 
@@ -186,7 +186,7 @@ class AgentboxClass
      * @param array $user_contact Enquiry result or contact request result
      * @return void
      */
-    public function attach_agent( $user_contact )
+    public function attach_agent($user_contact)
     {
         // NOTE: Default behavior: 
         // =========================================================
@@ -196,26 +196,26 @@ class AgentboxClass
         // =========================================================
 
         // Check if user is registered, quickly return if not
-        if ( !$user_contact ) {
+        if (!$user_contact) {
             return;
         }
 
         // Check if passed enquiry is the raw http response from agentbox
-        if ( is_array( $user_contact ) && isset( $user_contact['body'] ) ) {
-            $user_contact = json_decode( $user_contact['body'] );
+        if (is_array($user_contact) && isset($user_contact['body'])) {
+            $user_contact = json_decode($user_contact['body']);
         }
 
         // Process user
-        if ( $user_contact instanceof \stdClass ) {
-            if ( property_exists( $user_contact, "response" ) ) {
-                $this->_logger->log_array( $user_contact );
+        if ($user_contact instanceof \stdClass) {
+            if (property_exists($user_contact, "response")) {
+                $this->_logger->log_array($user_contact);
                 $enquiry = $user_contact->response;
             }
         }
 
         // use OC's process in saving the primary owner
-        if ( $this->_options['save_primary_owner_default'] ) {
-            $this->process_oc_primary_owner( $enquiry );
+        if ($this->_options['save_primary_owner_default']) {
+            $this->process_oc_primary_owner($enquiry);
         }
     }
 
@@ -225,33 +225,33 @@ class AgentboxClass
      * @param array $agentbox_enquiry_response Response from Agentbox enquiry
      * @return array returns the update results
      */
-    protected function process_oc_primary_owner( $agentbox_enquiry_response )
+    protected function process_oc_primary_owner($agentbox_enquiry_response)
     {
-        $_registered = $this->is_user_registered( $this->_state->get_email() );
+        $_registered = $this->is_user_registered($this->_state->get_email());
         $agent_email = $this->_state->get_agent_email();
 
         // Check first if contact has primary owner
-        $has_primary_owner  = $this->contact_has_primary_owner( $_registered );
-        $have_default_owner = $this->have_default_primary_owner( $_registered );
+        $has_primary_owner = $this->contact_has_primary_owner($_registered);
+        $have_default_owner = $this->have_default_primary_owner($_registered);
 
         // REPLACE primary owner if default is found
-        if ( $have_default_owner && $has_primary_owner ) {
-            $this->_logger->log_info( "Default Primary owner found: {$this->_options['global_default_primary_owner']}" );
+        if ($have_default_owner && $has_primary_owner) {
+            $this->_logger->log_info("Default Primary owner found: {$this->_options['global_default_primary_owner']}");
 
             // check if agent email exists
-            $this->update_primary_owner( $agentbox_enquiry_response );
+            $this->update_primary_owner($agentbox_enquiry_response);
 
             return [];
         }
 
         // RETURN if primary owner detected
-        if ( !$have_default_owner && $has_primary_owner ) {
-            $this->_logger->log_info( 'Primary owner found' );
+        if (!$have_default_owner && $has_primary_owner) {
+            $this->_logger->log_info('Primary owner found');
             return [];
         }
 
         // Update ownership if no primary owner found
-        $this->update_primary_owner( $agentbox_enquiry_response );
+        $this->update_primary_owner($agentbox_enquiry_response);
     }
 
     /**
@@ -260,38 +260,38 @@ class AgentboxClass
      * @param string|array $contact  The enquiry contact
      * @return boolean
      */
-    public function have_default_primary_owner( $contact )
+    public function have_default_primary_owner($contact)
     {
-        if ( !isset( $this->_options['global_default_primary_owner'] ) && $this->_options['global_default_primary_owner'] == "" ) {
+        if (!isset($this->_options['global_default_primary_owner']) && $this->_options['global_default_primary_owner'] == "") {
             return false;
         }
 
-        if ( is_array( $contact ) && isset( $contact['response'] ) ) {
-            $contact = json_decode( $contact['body'] );
+        if (is_array($contact) && isset($contact['response'])) {
+            $contact = json_decode($contact['body']);
         }
 
         $default_primary_owner = $this->_options['global_default_primary_owner'];
 
         // if contact passed is a result of previous agentbox request
-        if ( $contact instanceof \stdClass ) {
-            if ( property_exists( $contact, "response" ) ) {
-                $this->_logger->log_array( $contact );
+        if ($contact instanceof \stdClass) {
+            if (property_exists($contact, "response")) {
+                $this->_logger->log_array($contact);
                 $user = $contact->response->contacts[0];
 
-                $primary_owner = $this->contact_has_primary_owner( $user );
+                $primary_owner = $this->contact_has_primary_owner($user);
             }
 
             return $default_primary_owner == $primary_owner;
         }
 
         // check if passed argument is an email
-        if ( is_email( $contact ) ) {
-            $user = $this->is_user_registered( $this->_state->get_email() );
+        if (is_email($contact)) {
+            $user = $this->is_user_registered($this->_state->get_email());
 
-            $agent = $this->contact_has_primary_owner( $user, false );
+            $agent = $this->contact_has_primary_owner($user, false);
 
             // recursive method -> pass the stdClass to method
-            $this->have_default_primary_owner( $agent );
+            $this->have_default_primary_owner($agent);
         }
 
 
@@ -305,12 +305,12 @@ class AgentboxClass
      * @param string $agent_email Default: null. Saves the agent email as primary owner
      * @return void
      */
-    public function update_primary_owner( $agentbox_contact, $agent_email = null )
+    public function update_primary_owner($agentbox_contact, $agent_email = null)
     {
         $agent_email = $agent_email ?? $this->_state->get_agent_email();
-        $agent_res   = $this->get_staff_by_email( $agent_email );
+        $agent_res = $this->get_staff_by_email($agent_email);
 
-        $this->_logger->log_info( 'Adding primary owner: ' . $agent_email );
+        $this->_logger->log_info('Adding primary owner: ' . $agent_email);
         $contact_id = "";
 
         // READ: Main point of this code is to get the ID of the contact/enquirer in agentbox
@@ -319,52 +319,52 @@ class AgentboxClass
 
         // ACCEPTS: Agentbox stdClass        
         // Main code block to process the contact_id. All succeeding code block loops here.
-        if ( $agentbox_contact instanceof \stdClass ) {
-            if ( property_exists( $agentbox_contact, "enquiry" ) ) {
+        if ($agentbox_contact instanceof \stdClass) {
+            if (property_exists($agentbox_contact, "enquiry")) {
                 $contact_id = $agentbox_contact->enquiry->contact->id;
             }
         }
 
         // ACCEPTS: Agentbox raw response
         // if contact passed is a result of previous agentbox enqjuiry request.
-        if ( is_array( $agentbox_contact ) && isset( $agentbox_contact['body'] ) ) {
-            $contact = json_decode( $agentbox_contact['body'] );
+        if (is_array($agentbox_contact) && isset($agentbox_contact['body'])) {
+            $contact = json_decode($agentbox_contact['body']);
 
             // Run through related staff to check if the Primary Owner exists
-            if ( !empty( $contact->response ) ) {
-                $this->update_primary_owner( $contact->response );
+            if (!empty($contact->response)) {
+                $this->update_primary_owner($contact->response);
             }
         }
 
         // ACCEPTS: email
         // check if passed argument is an email
-        if ( !( $agentbox_contact instanceof \stdClass ) ) {
-            if ( is_email( $agentbox_contact ) ) {
-                $contact      = $this->contacts( [ 'email' => $agentbox_contact ] );
-                $contact_body = json_decode( $contact['body'] );
-                $contact_id   = $contact_body->response->contacts[0]->id;
+        if (!($agentbox_contact instanceof \stdClass)) {
+            if (is_email($agentbox_contact)) {
+                $contact = $this->contacts(['email' => $agentbox_contact]);
+                $contact_body = json_decode($contact['body']);
+                $contact_id = $contact_body->response->contacts[0]->id;
             }
         }
 
         // Get agent ID
         $agent_id = $agent_res->id;
 
-        $contact_body = [ 
-            'contact' => [ 
-                "attachedRelatedStaffMembers" => [ 
-                    [ 
+        $contact_body = [
+            'contact' => [
+                "attachedRelatedStaffMembers" => [
+                    [
                         'role' => 'Primary Owner',
-                        'id'   => $agent_id,
+                        'id' => $agent_id,
                     ],
                 ],
             ],
         ];
 
 
-        if ( $contact_id !== "" ) {
-            $this->put_contacts( $contact_id, $contact_body );
+        if ($contact_id !== "") {
+            $this->put_contacts($contact_id, $contact_body);
         } else {
-            $this->_logger->log_error( "no contact id" );
+            $this->_logger->log_error("no contact id");
         }
 
     }
@@ -375,16 +375,16 @@ class AgentboxClass
      * @param array $update_payload
      * @return void
      */
-    public function put_contacts( $contact_id, $update_payload )
+    public function put_contacts($contact_id, $update_payload)
     {
         $client = new AgentBoxClient();
-        $update = $client->put( "contacts/{$contact_id}", $update_payload );
+        $update = $client->put("contacts/{$contact_id}", $update_payload);
 
         // Log the results
-        if ( isset( $update['http'] ) ) {
-            $this->_logger->log( "(Enquiry Submission) {$update['message']} " );
+        if (isset($update['http'])) {
+            $this->_logger->log("(Enquiry Submission) {$update['message']} ");
         } else {
-            $this->_logger->log_debug( "(Enquiry Submission) {$update['response']['code']} {$update['response']['message']}" );
+            $this->_logger->log_debug("(Enquiry Submission) {$update['response']['code']} {$update['response']['message']}");
         }
     }
 
@@ -395,37 +395,37 @@ class AgentboxClass
      * @param boolean $return_bool Default: true. Indicates the type of data this method will return
      * @return boolean|array
      */
-    public function contact_has_primary_owner( $contact, $return_bool = true )
+    public function contact_has_primary_owner($contact, $return_bool = true)
     {
         // if contact passed is a result of previous agentbox request
-        if ( is_array( $contact ) && isset( $contact['body'] ) ) {
-            $contact = json_decode( $contact['body'] );
+        if (is_array($contact) && isset($contact['body'])) {
+            $contact = json_decode($contact['body']);
 
             // Run through related staff to check if the Primary Owner exists
-            if ( !empty( $contact->response->contacts ) ) {
+            if (!empty($contact->response->contacts)) {
                 $relatedStaff = $contact->response->contacts[0]->relatedStaffMembers;
             }
         }
 
-        if ( $contact instanceof \stdClass ) {
-            if ( property_exists( $contact, "relatedStaffMembers" ) ) {
+        if ($contact instanceof \stdClass) {
+            if (property_exists($contact, "relatedStaffMembers")) {
                 $relatedStaff = $contact->relatedStaffMembers;
             }
         }
 
         // check if passed argument is an email
-        if ( !( $contact instanceof \stdClass ) ) {
-            if ( is_email( $contact ) ) {
-                $user = $this->is_user_registered( $this->_state->get_email() );
+        if (!($contact instanceof \stdClass)) {
+            if (is_email($contact)) {
+                $user = $this->is_user_registered($this->_state->get_email());
 
-                $this->contact_has_primary_owner( $user );
+                $this->contact_has_primary_owner($user);
             }
         }
 
         // Process checking of related staffs
-        foreach ( $relatedStaff as $staff ) {
-            if ( $staff->role == "Primary Owner" ) {
-                if ( $return_bool ) {
+        foreach ($relatedStaff as $staff) {
+            if ($staff->role == "Primary Owner") {
+                if ($return_bool) {
                     return true;
                 }
                 return $contact;
@@ -442,11 +442,11 @@ class AgentboxClass
      * @param string $email
      * @return boolean
      */
-    public function is_contact_exists( $email )
+    public function is_contact_exists($email)
     {
-        $user = $this->is_user_registered( $email );
+        $user = $this->is_user_registered($email);
 
-        return isset( $user['body'] ) ?: false;
+        return isset($user['body']) ?: false;
     }
 
     /**
@@ -456,17 +456,17 @@ class AgentboxClass
      * @param string $key
      * @return array|string
      */
-    protected function get_body( $agentbox_http_response, $key = "" )
+    protected function get_body($agentbox_http_response, $key = "")
     {
-        $response = json_decode( $agentbox_http_response );
-        $contact  = $response->response->contacts[0];
+        $response = json_decode($agentbox_http_response);
+        $contact = $response->response->contacts[0];
 
         // if no key is available, return all response
-        if ( $key == "" ) {
+        if ($key == "") {
             return $contact;
         }
 
-        if ( property_exists( $contact, $key ) ) {
+        if (property_exists($contact, $key)) {
             return $contact->{$key};
         }
 
@@ -480,16 +480,16 @@ class AgentboxClass
      * @param string $return_bool return type of the method, returns boolean or http_response
      * @return boolean|array
      */
-    public function is_user_registered( $user_email, $return_bool = false )
+    public function is_user_registered($user_email, $return_bool = false)
     {
-        $client   = new AgentBoxClient();
-        $contact  = $client->get( 'contacts', [ 'email' => $user_email ], [ 'relatedStaffMembers' ] );
-        $response = json_decode( $contact['body'] );
+        $client = new AgentBoxClient();
+        $contact = $client->get('contacts', ['email' => $user_email], ['relatedStaffMembers']);
+        $response = json_decode($contact['body']);
 
-        if ( $response->response->items > 0 ) {
-            $this->_logger->log_info( "{$user_email} is saved in Agentbox" );
+        if ($response->response->items > 0) {
+            $this->_logger->log_info("{$user_email} is saved in Agentbox");
             // Return true if we need a boolean response instead of the result
-            if ( $return_bool ) {
+            if ($return_bool) {
                 return true;
             }
             return $contact;
@@ -509,23 +509,23 @@ class AgentboxClass
      * @param array $include (optional)  additional information added to response
      * @return array
      */
-    public function contacts( $info, $request = 'get', $include = [] )
+    public function contacts($info, $request = 'get', $include = [])
     {
-        $client  = new AgentBoxClient();
-        $include = empty( $include ) ? $this->_includes : $include;
+        $client = new AgentBoxClient();
+        $include = empty($include) ? $this->_includes : $include;
 
         // Pass the information as filter
         // see filters  for contacts in Agentbox
-        if ( is_array( $info ) && !empty( $info ) ) {
+        if (is_array($info) && !empty($info)) {
 
-            $contact = $client->{$request}( 'contacts', $info, $include );
-            $this->save_transactions( 'Contacts', '', $contact );
+            $contact = $client->{$request}('contacts', $info, $include);
+            $this->save_transactions('Contacts', '', $contact);
 
             return $contact;
         }
 
         // Do the request for information passed as contact id
-        $contact = $client->{$request}( "contact/{$info}", [], $include );
+        $contact = $client->{$request}("contact/{$info}", [], $include);
 
         return $contact;
     }
@@ -539,25 +539,25 @@ class AgentboxClass
      * @param array $include (optional) additional information added to response
      * @return array
      */
-    public function staff( $info, $include = [] )
+    public function staff($info, $include = [])
     {
-        $client  = new AgentBoxClient();
-        $include = empty( $include ) ? $this->_includes : $include;
+        $client = new AgentBoxClient();
+        $include = empty($include) ? $this->_includes : $include;
 
         // Pass the information as filter
         // see filters  for contacts in Agentbox
-        if ( is_array( $info ) && !empty( $info ) ) {
+        if (is_array($info) && !empty($info)) {
 
-            $staff = $client->get( 'staff', $info, $include );
-            $this->save_transactions( 'Contacts', '', $staff );
+            $staff = $client->get('staff', $info, $include);
+            $this->save_transactions('Contacts', '', $staff);
 
             return $staff;
         }
 
         // Do the request for information passed as contact id
-        $staff = $client->get( "staff/{$info}", [], $include );
+        $staff = $client->get("staff/{$info}", [], $include);
 
-        return json_decode( $staff );
+        return json_decode($staff);
     }
 
     /**
@@ -569,10 +569,10 @@ class AgentboxClass
      * @param array $include (optional) Output addtional object in the response
      * @return void
      */
-    public function contact_classes( $filter = "", $include = [] )
+    public function contact_classes($filter = "", $include = [])
     {
-        $client  = new AgentBoxClient();
-        $include = empty( $include ) ? $this->_includes : $include;
+        $client = new AgentBoxClient();
+        $include = empty($include) ? $this->_includes : $include;
 
 
 
@@ -586,14 +586,14 @@ class AgentboxClass
      * @param array $includes (optional) Output additional objects in the response.
      * @return array
      */
-    public function projects( $project_id = null, $includes = [] )
+    public function projects($project_id = null, $includes = [])
     {
-        $client  = new AgentBoxClient();
-        $include = empty( $include ) ? $this->_includes : $include;
+        $client = new AgentBoxClient();
+        $include = empty($include) ? $this->_includes : $include;
 
-        $endpoint = ( $project_id ) ? "projects" : "projects/{$project_id}";
+        $endpoint = ($project_id) ? "projects" : "projects/{$project_id}";
 
-        $project = $client->get( $endpoint );
+        $project = $client->get($endpoint);
     }
 
     /**
@@ -603,7 +603,7 @@ class AgentboxClass
      * 
      * @return void
      */
-    public function inlude( $includes = [] )
+    public function inlude($includes = [])
     {
         $this->_include = $includes;
     }
@@ -615,17 +615,17 @@ class AgentboxClass
      * 
      * @return void
      */
-    public function response( $options = [] )
+    public function response($options = [])
     {
-        if ( isset( $options['response_type'] ) && 'json' == $options['response_type'] ) {
+        if (isset($options['response_type']) && 'json' == $options['response_type']) {
 
         }
 
-        if ( isset( $options['response_type'] ) && 'array' == $options['response_type'] ) {
+        if (isset($options['response_type']) && 'array' == $options['response_type']) {
 
         }
 
-        if ( isset( $options['response_type'] ) && 'object' == $options['response_type'] ) {
+        if (isset($options['response_type']) && 'object' == $options['response_type']) {
 
         }
     }
@@ -636,15 +636,15 @@ class AgentboxClass
      * @param string $email staff email§
      * @return array|boolean
      */
-    public function get_staff_by_email( $email )
+    public function get_staff_by_email($email)
     {
         // return false if passed arg is an invalid email format
-        if ( !is_email( $email ) ) {
+        if (!is_email($email)) {
             return false;
         }
 
-        $agent_info = $this->staff( [ 'email' => $email ] );
-        $agent_info = json_decode( $agent_info['body'] );
+        $agent_info = $this->staff(['email' => $email]);
+        $agent_info = json_decode($agent_info['body']);
 
         return $agent_info->response->staffMembers[0];
     }
@@ -660,7 +660,7 @@ class AgentboxClass
      * 
      * @return void
      */
-    protected function save_transactions( $key, $additional_information, $http_response )
+    protected function save_transactions($key, $additional_information, $http_response)
     {
         // $this->_steps[] = compact( 'key', 'additional_information', 'http_response' );
     }
@@ -675,10 +675,10 @@ class AgentboxClass
      * 
      * @return void
      */
-    public function set_source( $source )
+    public function set_source($source)
     {
         $this->_source = $source;
-        $this->_state->set_source( $source );
+        $this->_state->set_source($source);
     }
 
     /**
