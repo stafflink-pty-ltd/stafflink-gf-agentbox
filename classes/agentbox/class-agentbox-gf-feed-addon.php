@@ -1,13 +1,10 @@
 <?php
 // Include the Gravity Forms Add-On Framework
-
-require_once GF_Agentbox_Bootstrap_DIR . '/vendor/autoload.php';
-
-require_once GF_Agentbox_Bootstrap_DIR . '/classes/Inc/class-logger.php';
-require_once GF_Agentbox_Bootstrap_DIR . '/classes/Agentbox/class-agentbox.php';
+require_once GF_Agentbox_Bootstrap_DIR . '/classes/Inc/ClassLogger.php';
+require_once GF_Agentbox_Bootstrap_DIR . '/classes/Agentbox/AgentboxClass.php';
 
 use GFAgentbox\Agentbox\AgentboxClass;
-use GFAgentbox\Inc\StafflinkLogger;
+use GFAgentbox\Inc\ClassLogger;
 
 GFForms::include_feed_addon_framework();
 
@@ -58,7 +55,7 @@ class GF_Agentbox extends GFFeedAddOn
 	 *
 	 * @var string
 	 */
-	protected $_path = "gravityformsagentbox/stafflink-gf-agentbox.php";
+	protected $_path = "gravityformsagentbox/wp-agentbox.php";
 
 	/**
 	 * Store all options here
@@ -80,7 +77,7 @@ class GF_Agentbox extends GFFeedAddOn
 	 *
 	 * @var string
 	 */
-	protected $_url = "https://stafflink.com.au";
+	protected $_url = "https://realcoder.com.au";
 
 	/**
 	 * Title of this add-on
@@ -94,7 +91,7 @@ class GF_Agentbox extends GFFeedAddOn
 	 *
 	 * @var string
 	 */
-	protected $_short_title = "Stafflink";
+	protected $_short_title = "Realcoder";
 
 
 	/**
@@ -108,7 +105,7 @@ class GF_Agentbox extends GFFeedAddOn
 	/**
 	 * Create a logger for this addon
 	 *
-	 * @var StafflinkLogger
+	 * @var ClassLogger
 	 */
 	private static $logger;
 
@@ -119,9 +116,9 @@ class GF_Agentbox extends GFFeedAddOn
 	 */
 	public static function get_instance()
 	{
-		if ( self::$_instance == null ) {
+		if (self::$_instance == null) {
 			self::$_instance = new GF_Agentbox;
-			self::$logger    = new StafflinkLogger;
+			self::$logger = new ClassLogger;
 		}
 
 		return self::$_instance;
@@ -145,13 +142,13 @@ class GF_Agentbox extends GFFeedAddOn
 	public function plugin_settings_fields()
 	{
 		$addon_settings = $this->agentbox_addon_settings_field();
-		$settings       = [ 
-			[ 
-				'title'  => esc_html__( 'Agentbox Add-On Settings', 'gravityformsagentbox' ),
+		$settings = [
+			[
+				'title' => esc_html__('Agentbox Add-On Settings', 'gravityformsagentbox'),
 				'fields' => $addon_settings,
 			],
 		];
-		return apply_filters( 'gravityformsagentbox/plugin-settings', $settings, $this );
+		return apply_filters('gravityformsagentbox/plugin-settings', $settings, $this);
 	}
 
 	/**
@@ -161,29 +158,29 @@ class GF_Agentbox extends GFFeedAddOn
 	 */
 	public function agentbox_addon_settings_field()
 	{
-		$settings = [ 
-			[ 
-				'name'    => 'global_default_primary_owner',
-				'label'   => esc_html__( 'Default Primary Owner', 'gravityformsagentbox' ),
-				'type'    => 'text',
-				'tooltip' => esc_html__( 'Add a staff email or staff id string to the textbox to add default primary owner for enquiries without primary owner set in Agentbox', 'gravityformsagentbox' ),
+		$settings = [
+			[
+				'name' => 'global_default_primary_owner',
+				'label' => esc_html__('Default Primary Owner', 'gravityformsagentbox'),
+				'type' => 'text',
+				'tooltip' => esc_html__('Add a staff email or staff id string to the textbox to add default primary owner for enquiries without primary owner set in Agentbox', 'gravityformsagentbox'),
 			],
-			[ 
-				'name'          => 'global_related_staff_appendable',
-				'label'         => esc_html__( 'Append new registered agent', 'gravityformsagentbox' ),
-				'type'          => 'checkbox',
+			[
+				'name' => 'global_related_staff_appendable',
+				'label' => esc_html__('Append new registered agent', 'gravityformsagentbox'),
+				'type' => 'checkbox',
 				'default_value' => true,
-				'tooltip'       => esc_html__( 'When set to false, the new registered agent will override the existing agent of the contact', 'gravityformsagentbox' ),
-				'choices'       => [ 
-					[ 
+				'tooltip' => esc_html__('When set to false, the new registered agent will override the existing agent of the contact', 'gravityformsagentbox'),
+				'choices' => [
+					[
 						'label' => 'Enabled',
-						'name'  => 'enabled',
+						'name' => 'enabled',
 					],
 				],
 			],
 		];
 
-		return apply_filters( 'gravityformsagentbox/agentbox-addon-settings', $settings, $this );
+		return apply_filters('gravityformsagentbox/agentbox-addon-settings', $settings, $this);
 	}
 
 	/**
@@ -205,74 +202,74 @@ class GF_Agentbox extends GFFeedAddOn
 	public function feed_settings_fields()
 	{
 		$field_options = $this->get_options();
-		$settings      = [];
+		$settings = [];
 
 		// Feed Name
 		// Troubleshooting message
-		$agentbox_mapping[] = [ 
-			'name'  => 'mapping-troubleshooting',
-			'label' => esc_html__( 'Agentbox records are not creating?', 'gravityformsagentbox' ),
-			'type'  => 'html',
-			'html'  => sprintf( '<p>%1$s</p>', wp_kses( __( '<span class="">Notice: </span>Firstname, Email, and Mobile are required fields', 'gravityformsagentbox' ), [ 'span' => [] ] ) ),
+		$agentbox_mapping[] = [
+			'name' => 'mapping-troubleshooting',
+			'label' => esc_html__('Agentbox records are not creating?', 'gravityformsagentbox'),
+			'type' => 'html',
+			'html' => sprintf('<p>%1$s</p>', wp_kses(__('<span class="">Notice: </span>Firstname, Email, and Mobile are required fields', 'gravityformsagentbox'), ['span' => []])),
 		];
 
-		$agentbox_mapping[] = [ 
-			'name'     => 'name',
-			'label'    => esc_html__( 'Feed Name', 'gravityformsagentbox' ),
-			'type'     => 'text',
+		$agentbox_mapping[] = [
+			'name' => 'name',
+			'label' => esc_html__('Feed Name', 'gravityformsagentbox'),
+			'type' => 'text',
 			'required' => true,
-			'class'    => 'medium',
-			'tooltip'  => esc_html__( 'Enter a feed name to uniquely identify it.', 'gravityformsagentbox' ),
+			'class' => 'medium',
+			'tooltip' => esc_html__('Enter a feed name to uniquely identify it.', 'gravityformsagentbox'),
 		];
 
 		// Dynamic field maps
-		$agentbox_mapping[] = [ 
-			'name'              => 'mapped-fields',
-			'label'             => esc_html__( 'Fields Mapping', 'gravityformsagentbox' ),
-			'type'              => 'dynamic_field_map',
-			'required'          => true,
-			'value_field'       => [ 
-				'title' => esc_html__( 'GravityForm Field Name', 'gravityformsagentbox' ),
+		$agentbox_mapping[] = [
+			'name' => 'mapped-fields',
+			'label' => esc_html__('Fields Mapping', 'gravityformsagentbox'),
+			'type' => 'dynamic_field_map',
+			'required' => true,
+			'value_field' => [
+				'title' => esc_html__('GravityForm Field Name', 'gravityformsagentbox'),
 			],
-			'key_field'         => [ 
-				'title' => esc_html__( 'Agentbox Field Name', 'gravityformsagentbox' ),
+			'key_field' => [
+				'title' => esc_html__('Agentbox Field Name', 'gravityformsagentbox'),
 			],
-			'dependency'        => '',
+			'dependency' => '',
 			'enable_custom_key' => true,
-			'field_map'         => $field_options,
-			'tooltip'           => esc_html__( 'Add and select the form fields, then choose the Agentbox column where to send each piece of data to. Make sure the column names are entered identically to your database.', 'gravityformsagentbox' ),
+			'field_map' => $field_options,
+			'tooltip' => esc_html__('Add and select the form fields, then choose the Agentbox column where to send each piece of data to. Make sure the column names are entered identically to your database.', 'gravityformsagentbox'),
 		];
 
 
 
 		// SETTINGS TABLE
 		// Create the settings table that will be shown to plugin's settings
-		$settings[] = [ 
-			'title'  => esc_html__( 'Agentbox Field mapping', 'gravityformsagentbox' ),
+		$settings[] = [
+			'title' => esc_html__('Agentbox Field mapping', 'gravityformsagentbox'),
 			'fields' => $agentbox_mapping,
 		];
 
-		$settings[] = [ 
-			'title'  => esc_html__( 'Agentbox API Settings', 'gravityformsagentbox' ),
-			'fields' => [ 
-				[ 
-					'name'    => 'default_primary_owner',
-					'label'   => esc_html__( 'Default Primary Owner', 'gravityformsagentbox' ),
-					'type'    => 'text',
-					'tooltip' => esc_html__( 'This will override the global settings. Add a staff email or staff id string to the textbox to add default primary owner for enquiries without primary owner set in Agentbox', 'gravityformsagentbox' ),
+		$settings[] = [
+			'title' => esc_html__('Agentbox API Settings', 'gravityformsagentbox'),
+			'fields' => [
+				[
+					'name' => 'default_primary_owner',
+					'label' => esc_html__('Default Primary Owner', 'gravityformsagentbox'),
+					'type' => 'text',
+					'tooltip' => esc_html__('This will override the global settings. Add a staff email or staff id string to the textbox to add default primary owner for enquiries without primary owner set in Agentbox', 'gravityformsagentbox'),
 				],
 			],
 		];
 
 		// Add conditional logic settings
-		$settings[] = [ 
-			'title'  => esc_html__( 'Enable Condition', 'gravityformsagentbox' ),
-			'fields' => [ 
-				[ 
-					'type'           => 'feed_condition',
-					'name'           => 'feed-condition',
-					'label'          => esc_html__( 'Conditions', 'gravityformsagentbox' ),
-					'checkbox_label' => esc_html__( 'Enable conditional processing', 'gravityformsagentbox' ),
+		$settings[] = [
+			'title' => esc_html__('Enable Condition', 'gravityformsagentbox'),
+			'fields' => [
+				[
+					'type' => 'feed_condition',
+					'name' => 'feed-condition',
+					'label' => esc_html__('Conditions', 'gravityformsagentbox'),
+					'checkbox_label' => esc_html__('Enable conditional processing', 'gravityformsagentbox'),
 				],
 			],
 		];
@@ -289,9 +286,9 @@ class GF_Agentbox extends GFFeedAddOn
 	 */
 	public function feed_list_columns()
 	{
-		return [ 
-			'name'           => esc_html__( 'Feed Name', 'gravityformsagentbox' ),
-			'has_conditions' => esc_html__( 'Condition(s)', 'gravityformsagentbox' ),
+		return [
+			'name' => esc_html__('Feed Name', 'gravityformsagentbox'),
+			'has_conditions' => esc_html__('Condition(s)', 'gravityformsagentbox'),
 		];
 	}
 
@@ -302,10 +299,10 @@ class GF_Agentbox extends GFFeedAddOn
 	 */
 	public function get_options()
 	{
-		if ( empty( $this->options ) ) {
+		if (empty($this->options)) {
 			$this->options = $this->build_options();
 		}
-		return apply_filters( 'gravityformsagentbox/feed-bases-options', $this->options, $this );
+		return apply_filters('gravityformsagentbox/feed-bases-options', $this->options, $this);
 	}
 
 	/**
@@ -315,50 +312,50 @@ class GF_Agentbox extends GFFeedAddOn
 	 */
 	public function build_options()
 	{
-		$options = [ 
-			'first_name'           => [ 
-				'name'       => 'first_name',
-				'label'      => __( 'First Name', 'gravityformsagentbox' ),
-				'type'       => 'dynamic_field_map',
-				'validation' => [ 
+		$options = [
+			'first_name' => [
+				'name' => 'first_name',
+				'label' => __('First Name', 'gravityformsagentbox'),
+				'type' => 'dynamic_field_map',
+				'validation' => [
 					'required' => true,
 				],
 			],
-			'last_name'            => [ 
-				'name'  => 'last_name',
-				'label' => __( 'Last Name', 'gravityformsagentbox' ),
-				'type'  => 'dynamic_field_map',
+			'last_name' => [
+				'name' => 'last_name',
+				'label' => __('Last Name', 'gravityformsagentbox'),
+				'type' => 'dynamic_field_map',
 			],
-			'email'                => [ 
-				'name'       => 'email',
-				'label'      => __( 'Email', 'gravityformsagentbox' ),
-				'type'       => 'dynamic_field_map',
-				'validation' => [ 
+			'email' => [
+				'name' => 'email',
+				'label' => __('Email', 'gravityformsagentbox'),
+				'type' => 'dynamic_field_map',
+				'validation' => [
 					'required' => true,
 				],
 			],
-			'mobile'               => [ 
-				'name'       => 'mobile',
-				'label'      => __( 'Mobile', 'gravityformsagentbox' ),
-				'type'       => 'dynamic_field_map',
-				'validation' => [ 
+			'mobile' => [
+				'name' => 'mobile',
+				'label' => __('Mobile', 'gravityformsagentbox'),
+				'type' => 'dynamic_field_map',
+				'validation' => [
 					'required' => true,
 				],
 			],
-			'agent_email'          => [ 
-				'name'  => 'agent_email',
-				'label' => __( 'Agent Email', 'gravityformsagentbox' ),
-				'type'  => 'dynamic_field_map',
+			'agent_email' => [
+				'name' => 'agent_email',
+				'label' => __('Agent Email', 'gravityformsagentbox'),
+				'type' => 'dynamic_field_map',
 			],
-			'property_agentbox_id' => [ 
-				'name'  => 'property_agentbox_id',
-				'label' => __( 'Property Agentbox ID', 'gravityformsagentbox' ),
-				'type'  => 'dynamic_field_map',
+			'property_agentbox_id' => [
+				'name' => 'property_agentbox_id',
+				'label' => __('Property Agentbox ID', 'gravityformsagentbox'),
+				'type' => 'dynamic_field_map',
 			],
-			'property_address'     => [ 
-				'name'  => 'property_address',
-				'label' => __( 'Property Address', 'gravityformsagentbox' ),
-				'type'  => 'dynamic_field_map',
+			'property_address' => [
+				'name' => 'property_address',
+				'label' => __('Property Address', 'gravityformsagentbox'),
+				'type' => 'dynamic_field_map',
 			],
 		];
 
@@ -374,7 +371,7 @@ class GF_Agentbox extends GFFeedAddOn
 	 */
 	public function get_menu_icon()
 	{
-		return file_get_contents( GF_Agentbox_Bootstrap_PATH . 'assets/stafflink-svg.svg' );
+		return file_get_contents(GF_Agentbox_Bootstrap_PATH . 'assets/stafflink-svg.svg');
 	}
 
 	/**
@@ -385,29 +382,37 @@ class GF_Agentbox extends GFFeedAddOn
 	 * @param array $form
 	 * @return array
 	 */
-	public function process_feed( $feed, $entry, $form )
+	public function process_feed($feed, $entry, $form)
 	{
 		// Test Agentbox connection first, if no connection has been made, return immediately
 		$ab_class = new AgentboxClass;
-		if ( ! $ab_class->test_connection() ) {
+		if (!$ab_class->test_connection()) {
 			// Log all errors in connections
-			$this->add_note(  $entry['id'], 'Access Denied, please check your credentials and try again', 'ERROR');
+			$this->add_feed_error('Access Denied, please check your credentials and try again', $feed, $entry, $form);
 			self::$logger->log('Agentbox connection: Access Denied');
 			error_log('Agentbox connection: Access Denied');
 			return [];
 		}
 
 		// Start creating enquiry for feed.
-		$res = $this->create_enquiry( $feed, $entry, $form );
+		$res = $this->create_enquiry($feed, $entry, $form);
 
-		if ( $res ) {
-			if ( 200 == $res['response']['response']['code'] ) {
-				$this->add_note( $entry['id'], 'Agentbox Entry Status: ' . $res->response->status );
+		if ($res) {
+			if ($res instanceof \stdClass) {
+				if ($res->response->status == 'success') {
+					$this->add_note($entry['id'], 'Agentbox Entry Status: ' . $res->response->status, 'success');
+				}
 			}
 
-			if ( 422 == $res['response']['response']['code'] ) {
-				$this->add_note( $entry['id'], 'Agentbox Entry Status: ' . $res->response->status, 'ERROR' );
-			}	
+			if (is_array($res)) {
+				if (201 == $res['response']['response']['code']) {
+					$this->add_note($entry['id'], 'Agentbox Entry Status: ' . $res->response->status, 'success');
+				}
+
+				if (422 == $res['response']['response']['code']) {
+					$this->add_feed_error('Agentbox Entry Status: ' . $res->response->status, $feed, $entry, $form);
+				}
+			}
 		}
 
 
@@ -422,61 +427,62 @@ class GF_Agentbox extends GFFeedAddOn
 	 * @param array $form
 	 * @return array
 	 */
-	public function create_enquiry( $feed, $entry, $form )
+	public function create_enquiry($feed, $entry, $form)
 	{
-		self::$logger->log( 'Start Enquiry ===========' ); // start logs
+		self::$logger->log('Start Enquiry ==========='); // start logs
 
 		// Get all information from feed
-		$data          = [];
-		$mapped_fields = $this->get_dynamic_field_map_fields( $feed, 'mapped-fields' );
+		$data = [];
+		$mapped_fields = $this->get_dynamic_field_map_fields($feed, 'mapped-fields');
 
 		// Create the array feed that will be passed to the agentbox plugin
-		foreach ( $mapped_fields as $name => $field_id ) {
+		foreach ($mapped_fields as $name => $field_id) {
 
 			// If no field is mapped, skip it.
-			if ( rgblank( $field_id ) ) {
+			if (rgblank($field_id)) {
 				continue;
 			}
 
 			// Get Field object
-			$field       = \GFFormsModel::get_field( $form, $field_id );
-			$field_value = $this->get_field_value( $form, $entry, $field_id );
+			$field = \GFFormsModel::get_field($form, $field_id);
+			$field_value = $this->get_field_value($form, $entry, $field_id);
 
 			// Process data
-			if ( $field ) {
+			if ($field) {
 				// Continue to next loop if field value is empty
-				if ( empty( $field_value ) ) continue;
+				if (empty($field_value))
+					continue;
 
 				// Format value
-				if ( 'multiselect' === $field->get_input_type() ) {
-					$field_value = explode( ', ', $field_value );
+				if ('multiselect' === $field->get_input_type()) {
+					$field_value = explode(', ', $field_value);
 				}
 
-				if ( 'checkbox' === $field->get_input_type() && count( $field->choices ) > 1 ) {
-					$field_value = explode( ', ', $field_value );
+				if ('checkbox' === $field->get_input_type() && count($field->choices) > 1) {
+					$field_value = explode(', ', $field_value);
 				}
 
-				if ( 'textarea' === $field->get_input_type() ) {
-					$field_value = wpautop( $field_value );
+				if ('textarea' === $field->get_input_type()) {
+					$field_value = wpautop($field_value);
 				}
 			}
 
-			$data[ $name ] = $field_value;
+			$data[$name] = $field_value;
 		}
 
-		$agentbox_feed = apply_filters( 'gravityformsagentbox/agentbox-create-enquiry-feed', $data, $mapped_fields, $feed, $entry, $form );
+		$agentbox_feed = apply_filters('gravityformsagentbox/agentbox-create-enquiry-feed', $data, $mapped_fields, $feed, $entry, $form);
 
 		// Create Enquiry;
 		$response = "";
 
 		try {
-			$agentbox_class = new AgentboxClass( $agentbox_feed, $this->get_plugin_settings() );
-			$agentbox_class->gravity_form( compact( 'feed', 'entry', 'form' ) );
+			$agentbox_class = new AgentboxClass($agentbox_feed, $this->get_plugin_settings());
+			$agentbox_class->gravity_form(compact('feed', 'entry', 'form'));
 			$response = $agentbox_class->enquiries();
 
-		} catch ( \Exception $e ) {
+		} catch (\Exception $e) {
 			// Log error
-			self::$logger->log( __METHOD__ . '(): Unable to send enquiry' );
+			self::$logger->log(__METHOD__ . '(): Unable to send enquiry');
 		}
 
 		// Add action after logging
@@ -490,9 +496,9 @@ class GF_Agentbox extends GFFeedAddOn
 			$form
 		);
 
-		self::$logger->log( 'End Enquiry ===========' ); // end logs
+		self::$logger->log('End Enquiry ==========='); // end logs
 
-		if ( !empty( $response ) ) {
+		if (!empty($response)) {
 			return $response;
 		}
 
@@ -517,14 +523,14 @@ class GF_Agentbox extends GFFeedAddOn
 	 * @param array $form
 	 * @return void
 	 */
-	public function register_meta_box( $meta_boxes, $entry, $form )
+	public function register_meta_box($meta_boxes, $entry, $form)
 	{
 		// If the form has an active feed belonging to this add-on and the API can be initialized, add the meta box.
-		if ( $this->get_active_feeds( $form['id'] ) ) {
-			$meta_boxes[ $this->_slug ] = array(
-				'title'    => $this->get_short_title(),
-				'callback' => array( $this, 'add_details_meta_box' ),
-				'context'  => 'side',
+		if ($this->get_active_feeds($form['id'])) {
+			$meta_boxes[$this->_slug] = array(
+				'title' => $this->get_short_title(),
+				'callback' => array($this, 'add_details_meta_box'),
+				'context' => 'side',
 			);
 		}
 
@@ -537,12 +543,12 @@ class GF_Agentbox extends GFFeedAddOn
 	 * @param array $args
 	 * @return void
 	 */
-	public function add_details_meta_box( $args )
+	public function add_details_meta_box($args)
 	{
-		$form  = $args['form'];
+		$form = $args['form'];
 		$entry = $args['entry'];
 
-		$html   = 'No data';
+		$html = 'No data';
 		$action = $this->slug . '_process_feeds';
 
 		// foreach( $entry as $key => $value )
