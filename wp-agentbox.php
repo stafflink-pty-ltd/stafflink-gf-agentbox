@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:     Gravity Forms - Agentbox Integration
+ * Plugin Name:     Gravity Forms - Agentbox
  * Plugin URI:      https://realcoder.com.au/
  * Description:     Allows pulling and pushing of data via the Agentbox API.
  * Author:          RealCoder Pty Ltd
@@ -107,7 +107,7 @@ if ( !class_exists( 'GF_Agentbox_Bootstrap' ) ) {
 			// Include utility functions. 
 
 			require_once dirname( __FILE__ ) . '/classes/Agentbox/class-agentbox-gf-feed-addon.php';
-			require_once WP_CONTENT_DIR . "/plugins/stafflink-gf-agentbox/agentbox-bootstrap.php";
+			require_once WP_CONTENT_DIR . "/plugins/wp-agentbox/agentbox-bootstrap.php";
 			$boot = new Agentbox_bootstrap();
 			$boot->start();
 

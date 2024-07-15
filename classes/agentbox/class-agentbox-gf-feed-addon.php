@@ -388,7 +388,7 @@ class GF_Agentbox extends GFFeedAddOn
 		$ab_class = new AgentboxClass;
 		if ( !$ab_class->test_connection() ) {
 			// Log all errors in connections
-			$this->add_note( $entry['id'], 'Access Denied, please check your credentials and try again', 'ERROR' );
+			$this->add_feed_error( 'Access Denied, please check your credentials and try again', $feed, $entry, $form );
 			self::$logger->log( 'Agentbox connection: Access Denied' );
 			error_log( 'Agentbox connection: Access Denied' );
 			return [];
@@ -398,12 +398,20 @@ class GF_Agentbox extends GFFeedAddOn
 		$res = $this->create_enquiry( $feed, $entry, $form );
 
 		if ( $res ) {
-			if ( 200 == $res['response']['response']['code'] ) {
-				$this->add_note( $entry['id'], 'Agentbox Entry Status: ' . $res->response->status );
+			if ( $res instanceof \stdClass ) {
+				if ( $res->response->status == 'success' ) {
+					$this->add_note( $entry['id'], 'Agentbox Entry Status: ' . $res->response->status, 'success' );
+				}
 			}
 
-			if ( 422 == $res['response']['response']['code'] ) {
-				$this->add_note( $entry['id'], 'Agentbox Entry Status: ' . $res->response->status, 'ERROR' );
+			if ( is_array( $res ) ) {
+				if ( 201 == $res['response']['response']['code'] ) {
+					$this->add_note( $entry['id'], 'Agentbox Entry Status: ' . $res->response->status, 'success' );
+				}
+
+				if ( 422 == $res['response']['response']['code'] ) {
+					$this->add_feed_error( 'Agentbox Entry Status: ' . $res->response->status, $feed, $entry, $form );
+				}
 			}
 		}
 
