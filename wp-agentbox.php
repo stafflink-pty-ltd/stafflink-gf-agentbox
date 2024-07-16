@@ -7,7 +7,7 @@
  * Author URI:      https://realcoder.com.au/
  * Text Domain:     gravityformsagentbox
  * Domain Path:     /languages
- * Version:         0.1.6
+ * Version:         0.1.7
  *
  * @package         SLAB
  */
@@ -30,7 +30,7 @@ if (!class_exists('GF_Agentbox_Bootstrap')) {
 		 *
 		 * @var string
 		 */
-		public static $version = '0.1.6';
+		public static $version = '0.1.7';
 
 		/**
 		 * The plugin settings array.
@@ -135,9 +135,6 @@ if (!class_exists('GF_Agentbox_Bootstrap')) {
 
 			/**
 			 * Fires after GF_Agentbox_Bootstrap is completely "initialized".
-			 *
-			 * @date    28/09/13
-			 * @since   5.0.0
 			 *
 			 * @param   int GF_Agentbox_Bootstrap_MAJOR_VERSION The major version of GF_Agentbox_Bootstrap.
 			 */
