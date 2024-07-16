@@ -6,7 +6,7 @@ use GFAgentbox\Inc\AbstractBaseConnection;
 use GFAgentbox\Inc\ConnectionInterface;
 use GFAgentbox\Inc\EndpointConfiguration;
 
-class AgentBoxClient extends AbstractBaseConnection implements ConnectionInterface
+class AgentboxClient extends AbstractBaseConnection implements ConnectionInterface
 {
 
     /**
